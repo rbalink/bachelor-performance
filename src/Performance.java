@@ -15,7 +15,7 @@ public class Performance {
 			String text;
 		
 			//test command
-			builder.command("bash", "-c", "ls /home/");
+			builder.command("bash", "-c", "lscpu");
 		
 			//start process
 			Process process = builder.start();
@@ -25,6 +25,7 @@ public class Performance {
 			
 			while((text = read.readLine()) != null){
 				out.append(text + "\n");
+				System.out.println(text);
 			}
 			
 			//finish process
