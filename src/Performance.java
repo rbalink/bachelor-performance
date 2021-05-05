@@ -14,7 +14,7 @@ public class Performance {
 			StringBuilder out = new StringBuilder();
 			String text;
 		
-			//test command
+			//list cpu info
 			builder.command("bash", "-c", "lscpu");
 		
 			//start process
@@ -32,12 +32,21 @@ public class Performance {
 			//TODO: else cases
 			int exit = process.waitFor();
 			System.out.println("\nFinished : " + exit);
+			System.out.println(out.toString());
 			
 			
 		} catch (Exception e){
 			e.printStackTrace();
 		}
 		//TODO: more Exceptions
+		
+		//TODO: RAM, GPU, more... from bash Terminal
+		
+		//TODO: Daten verarbeiten
+		
+		//TODO: Verbinden mit Online-Datenbank
+		
+		//TODO: Daten in externer Datenbank speichern
 	}
 
 }
