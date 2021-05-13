@@ -2,5 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/Robert/Downloads/cloud-sql-connector-jdbc-sqlserver-1.2.3-jar-with-driver-and-dependencies.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

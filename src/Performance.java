@@ -1,5 +1,8 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 
 public class Performance {
 
@@ -25,14 +28,14 @@ public class Performance {
 			
 			while((text = read.readLine()) != null){
 				out.append(text + "\n");
-				System.out.println(text);
+				//System.out.println(text);
 			}
 			
 			//finish process
 			//TODO: else cases
 			int exit = process.waitFor();
-			System.out.println("\nFinished : " + exit);
-			System.out.println(out.toString());
+			//System.out.println("\nFinished : " + exit);
+			//System.out.println(out.toString());
 			
 			
 		} catch (Exception e){
@@ -47,6 +50,18 @@ public class Performance {
 		//TODO: Verbinden mit Online-Datenbank
 		
 		//TODO: Daten in externer Datenbank speichern
+		String url = "jdbc:postgresql:///benchmarkdb?cloudSqlInstance=majestic-layout-311618:europe-west3:benchmarkdb&socketFactory=com.google.cloud.sql.postgres.SocketFactory&user=postgres&password=DancingQueen666";
+		
+		try {
+			System.out.println("Connecting to PostgreSQL");
+			Connection con = DriverManager.getConnection(url);
+			System.out.println("Successful");
+			Statement statement = con.createStatement();
+			statement.execute("INSERT INTO cpu (cpuname)"+ "VALUES ('Performance');");
+			System.out.println("Inserting successful");
+		} catch ( Exception e){
+			e.printStackTrace();
+		}
 	}
 
 }
