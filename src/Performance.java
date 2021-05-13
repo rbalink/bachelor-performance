@@ -50,6 +50,7 @@ public class Performance {
 		//TODO: Verbinden mit Online-Datenbank
 		
 		//TODO: Daten in externer Datenbank speichern
+		
 		String url = "jdbc:postgresql:///benchmarkdb?cloudSqlInstance=majestic-layout-311618:europe-west3:benchmarkdb&socketFactory=com.google.cloud.sql.postgres.SocketFactory&user=postgres&password=DancingQueen666";
 		
 		try {
