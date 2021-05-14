@@ -54,9 +54,11 @@ public class Performance {
 		String url = "jdbc:postgresql:///benchmarkdb?cloudSqlInstance=majestic-layout-311618:europe-west3:benchmarkdb&socketFactory=com.google.cloud.sql.postgres.SocketFactory&user=postgres&password=DancingQueen666";
 		
 		try {
-			System.out.println("Connecting to PostgreSQL");
+			System.out.println("Connect to Driver");
+			Class.forName("org.postgresql.Driver");
+			System.out.println("Connecting to PostgreSQL CloudSQL");
 			Connection con = DriverManager.getConnection(url);
-			System.out.println("Successful");
+			System.out.println("Successful connection");
 			Statement statement = con.createStatement();
 			statement.execute("INSERT INTO cpu (cpuname)"+ "VALUES ('Performance');");
 			System.out.println("Inserting successful");
