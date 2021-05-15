@@ -16,7 +16,13 @@ public class Performance {
 			ProcessBuilder builder = new ProcessBuilder();
 			StringBuilder out = new StringBuilder();
 			String text;
-		
+			
+			//add google credentials
+			String currentPath = "export GOOGLE_APPLICATION_CREDENTIALS=\""+System.getProperty("user.dir")+"/majestic-layout-311618-323b9d7633bf.json\"";
+			System.out.println(currentPath);
+			builder.command("bash", "-c", currentPath);
+			System.out.println("Credentials eingetragen");
+			
 			//list cpu info
 			builder.command("bash", "-c", "lscpu");
 		
