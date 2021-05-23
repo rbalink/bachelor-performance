@@ -17,11 +17,11 @@ public class Performance {
 			StringBuilder out = new StringBuilder();
 			String text;
 			
-			//add google credentials
-			String currentPath = "export GOOGLE_APPLICATION_CREDENTIALS=\""+System.getProperty("user.dir")+"/majestic-layout-311618-323b9d7633bf.json\"";
-			System.out.println(currentPath);
-			builder.command("bash", "-c", currentPath);
-			System.out.println("Credentials eingetragen");
+			//TODO: add google credentials
+			//String currentPath = "export GOOGLE_APPLICATION_CREDENTIALS=\""+System.getProperty("user.dir")+"/majestic-layout-311618-323b9d7633bf.json\"";
+			//System.out.println(currentPath);
+			//builder.command("bash", "-c", currentPath);
+			//System.out.println("Credentials eingetragen");
 			
 			//list cpu info
 			builder.command("bash", "-c", "lscpu");
@@ -55,9 +55,9 @@ public class Performance {
 		
 		//TODO: Verbinden mit Online-Datenbank
 		
-		//TODO: Daten in externer Datenbank speichern
+		// Connecting to CloudSQL (Postgres)
 		
-		String url = "jdbc:postgresql:///benchmarkdb?cloudSqlInstance=majestic-layout-311618:europe-west3:benchmarkdb&socketFactory=com.google.cloud.sql.postgres.SocketFactory&user=postgres&password=DancingQueen666";
+		String url = "jdbc:postgresql:///postgres?cloudSqlInstance=majestic-layout-311618:europe-west3:benchmarkdb&socketFactory=com.google.cloud.sql.postgres.SocketFactory&user=postgres&password=DancingQueen666";
 		
 		try {
 			System.out.println("Connect to Driver");
