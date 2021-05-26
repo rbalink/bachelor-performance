@@ -7,21 +7,20 @@ import java.sql.Statement;
 public class Performance {
 
 	public static void main(String[] args) {
-		System.out.println("Hello VM-Machine");
+		final String url = "jdbc:postgresql://35.234.107.124:5432/";
+		final String user = "postgres";
+		final String password = "geheim";
 		
 		try {
 			
-			//TODO: check if Linux --- else exit
+			if(!(System.getProperty("os.name").equals("Linux"))){
+				System.err.println("The operating system for this program should be Linux!");
+			}
+			
 			
 			ProcessBuilder builder = new ProcessBuilder();
 			StringBuilder out = new StringBuilder();
 			String text;
-			
-			//TODO: add google credentials
-			//String currentPath = "export GOOGLE_APPLICATION_CREDENTIALS=\""+System.getProperty("user.dir")+"/majestic-layout-311618-323b9d7633bf.json\"";
-			//System.out.println(currentPath);
-			//builder.command("bash", "-c", currentPath);
-			//System.out.println("Credentials eingetragen");
 			
 			//list cpu info
 			builder.command("bash", "-c", "lscpu");
@@ -55,18 +54,18 @@ public class Performance {
 		
 		//TODO: Verbinden mit Online-Datenbank
 		
-		// Connecting to CloudSQL (Postgres)
-		
-		String url = "jdbc:postgresql:///postgres?cloudSqlInstance=majestic-layout-311618:europe-west3:benchmarkdb&socketFactory=com.google.cloud.sql.postgres.SocketFactory&user=postgres&password=DancingQueen666";
-		
+		// Connecting to external PostgreSQL
+
 		try {
-			System.out.println("Connect to Driver");
+			System.out.println("Loading the Driver");
 			Class.forName("org.postgresql.Driver");
-			System.out.println("Connecting to PostgreSQL CloudSQL");
-			Connection con = DriverManager.getConnection(url);
+			System.out.println("Connecting to external PostgreSQL Server");
+			Connection con = DriverManager.getConnection(url,user,password);
 			System.out.println("Successful connection");
+			
 			Statement statement = con.createStatement();
-			statement.execute("INSERT INTO cpu (cpuname)"+ "VALUES ('Performance');");
+			statement.execute("INSERT INTO datatbl (cpu_model_name, cpu_family)"+ "VALUES ('JavaTestAgain',22);");
+			
 			System.out.println("Inserting successful");
 		} catch ( Exception e){
 			e.printStackTrace();
