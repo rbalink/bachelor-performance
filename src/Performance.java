@@ -3,6 +3,7 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.HashMap;
 
 public class Performance {
 
@@ -10,6 +11,7 @@ public class Performance {
 		final String url = "jdbc:postgresql://35.234.107.124:5432/";
 		final String user = "postgres";
 		final String password = "geheim";
+		HashMap<String, String> lscpu = new HashMap<>();
 		
 		try {
 			
@@ -19,7 +21,6 @@ public class Performance {
 			
 			
 			ProcessBuilder builder = new ProcessBuilder();
-			StringBuilder out = new StringBuilder();
 			String text;
 			
 			//list cpu info
@@ -32,31 +33,30 @@ public class Performance {
 			BufferedReader read = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			
 			while((text = read.readLine()) != null){
-				out.append(text + "\n");
-				//System.out.println(text);
+				String[] parts = text.split(":", 2);
+				parts[1] = parts[1].trim();
+				lscpu.put(parts[0], parts[1]);
 			}
-			
-			//finish process
-			//TODO: else cases
 			int exit = process.waitFor();
-			//System.out.println("\nFinished : " + exit);
-			//System.out.println(out.toString());
 			
+			//TODO: what if terminal language is english?
+			String modelname = lscpu.get("Modellname");
+			String model = lscpu.get("Modell");
+			int stepping = Integer.parseInt(lscpu.get("Stepping"));
+			float cpumhz = Float.parseFloat(lscpu.get("CPU MHz"));
+			int cpufamily = Integer.parseInt(lscpu.get("Prozessorfamilie"));
+			String l1dcache = "";
+			String l1icache = "";
+			String l2cache = "";
+			String l3cache = "";
 			
-		} catch (Exception e){
-			e.printStackTrace();
-		}
-		//TODO: more Exceptions
+			//printout hashmap
+			//lscpu.entrySet().forEach(entry -> {System.out.println(entry.getKey() + " "+ entry.getValue());
+			//});
 		
-		//TODO: RAM, GPU, more... from bash Terminal
+			//TODO: Connection to Online-CPU-Database (cpu-world.com)
 		
-		//TODO: Daten verarbeiten
-		
-		//TODO: Verbinden mit Online-Datenbank
-		
-		// Connecting to external PostgreSQL
-
-		try {
+			// Connection to remote PostgreSQL database
 			System.out.println("Loading the Driver");
 			Class.forName("org.postgresql.Driver");
 			System.out.println("Connecting to external PostgreSQL Server");
@@ -64,7 +64,7 @@ public class Performance {
 			System.out.println("Successful connection");
 			
 			Statement statement = con.createStatement();
-			statement.execute("INSERT INTO datatbl (cpu_model_name, cpu_family)"+ "VALUES ('JavaTestAgain',22);");
+			statement.execute("INSERT INTO datatbl (cpu_model_name, cpu_family, cpu_model, stepping, cpu_mhz)"+ "VALUES ('"+modelname+"',"+ cpufamily+","+ model+","+ stepping+","+cpumhz+");");
 			
 			System.out.println("Inserting successful");
 		} catch ( Exception e){
