@@ -7,5 +7,31 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="src/postgresql-42.2.20.jar"/>
+	<classpathentry kind="lib" path="src/lib/commons-codec-1.11.jar"/>
+	<classpathentry kind="lib" path="src/lib/commons-io-2.10.0.jar"/>
+	<classpathentry kind="lib" path="src/lib/commons-lang3-3.12.0.jar"/>
+	<classpathentry kind="lib" path="src/lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="src/lib/commons-net-3.8.0.jar"/>
+	<classpathentry kind="lib" path="src/lib/commons-text-1.9.jar"/>
+	<classpathentry kind="lib" path="src/lib/dec-0.1.2.jar"/>
+	<classpathentry kind="lib" path="src/lib/htmlunit-2.52.0.jar"/>
+	<classpathentry kind="lib" path="src/lib/htmlunit-core-js-2.52.0.jar"/>
+	<classpathentry kind="lib" path="src/lib/htmlunit-cssparser-1.9.0.jar"/>
+	<classpathentry kind="lib" path="src/lib/httpclient-4.5.13.jar"/>
+	<classpathentry kind="lib" path="src/lib/httpcore-4.4.13.jar"/>
+	<classpathentry kind="lib" path="src/lib/httpmime-4.5.13.jar"/>
+	<classpathentry kind="lib" path="src/lib/jetty-client-9.4.43.v20210629.jar"/>
+	<classpathentry kind="lib" path="src/lib/jetty-http-9.4.43.v20210629.jar"/>
+	<classpathentry kind="lib" path="src/lib/jetty-io-9.4.43.v20210629.jar"/>
+	<classpathentry kind="lib" path="src/lib/jetty-util-9.4.43.v20210629.jar"/>
+	<classpathentry kind="lib" path="src/lib/neko-htmlunit-2.52.0.jar"/>
+	<classpathentry kind="lib" path="src/lib/salvation2-3.0.0.jar"/>
+	<classpathentry kind="lib" path="src/lib/serializer-2.7.2.jar"/>
+	<classpathentry kind="lib" path="src/lib/websocket-api-9.4.43.v20210629.jar"/>
+	<classpathentry kind="lib" path="src/lib/websocket-client-9.4.43.v20210629.jar"/>
+	<classpathentry kind="lib" path="src/lib/websocket-common-9.4.43.v20210629.jar"/>
+	<classpathentry kind="lib" path="src/lib/xalan-2.7.2.jar"/>
+	<classpathentry kind="lib" path="src/lib/xercesImpl-2.12.0.jar"/>
+	<classpathentry kind="lib" path="src/lib/xml-apis-1.4.01.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
