@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.logging.Level;
 
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlTable;
 
 public class Performance {
 	final String url = "jdbc:postgresql://35.234.64.171:5432/performance";
@@ -25,12 +28,13 @@ public class Performance {
 		performance.getHardwareInformation();
 
 		// TODO: what if terminal language is english?
-		
+
 		// online CPU Database (boinc rosetta GFLOPS)
 		performance.scrapingDatabase();
+		System.out.println(performance.prozessor.toString());
 
 		// external postgres database
-		performance.externalDatabase();
+		// performance.externalDatabase();
 	}
 
 	public void getHardwareInformation() {
@@ -56,11 +60,11 @@ public class Performance {
 				parts[1] = parts[1].trim();
 				this.lscpu.put(parts[0], parts[1]);
 			}
-			
+
 			int exit = process.waitFor();
 
 		} catch (Exception e) {
-			System.err.println("Hardware Error");
+			System.err.println("Couldn't read from Terminal");
 			e.printStackTrace();
 		}
 
@@ -81,8 +85,9 @@ public class Performance {
 
 			Statement statement = con.createStatement();
 			statement.execute("INSERT INTO postgres (cpu_model_name, cpu_family, cpu_model, stepping, cpu_mhz)"
-					+ "VALUES ('" + this.prozessor.modelname + "'," + this.prozessor.cpufamily + ","
-					+ this.prozessor.model + "," + this.prozessor.stepping + "," + this.prozessor.cpumhz + ");");
+					+ "VALUES ('" + this.prozessor.getModelname() + "'," + this.prozessor.getCpufamily() + ","
+					+ this.prozessor.getModel() + "," + this.prozessor.getStepping() + "," + this.prozessor.getCpumhz()
+					+ ");");
 
 			System.out.println("Inserting successful");
 		} catch (Exception e) {
@@ -94,12 +99,31 @@ public class Performance {
 	public void scrapingDatabase() {
 		java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
 
+		String testCPU = "Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz";
+		String testCPU2 = "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz";
+		String testCPU3 = "Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz";
+
+		// Boinc Bakerlab Rosetta MFLOPS
+		// TODO: bei mehreren Eintraegen
 		try {
 			final WebClient webClient = new WebClient();
 			final HtmlPage page = webClient.getPage("https://boinc.bakerlab.org/rosetta/cpu_list.php");
-			System.out.println("Website: " + page.getTitleText());
+			DomNodeList<DomElement> versuch = page.getElementsByTagName("table");
+			HtmlTable table = (HtmlTable) versuch.get(0);
+
+			for (int i = 0; i < table.getRowCount(); i++) {
+				String cpuName = table.getRow(i).getCell(0).asNormalizedText();
+				if (cpuName.contains(testCPU)) {
+					String gflopsCore = table.getRow(i).getCell(3).asNormalizedText();
+					String gflopsComputer = table.getRow(i).getCell(4).asNormalizedText();
+					this.prozessor.setGflopsCore(Float.parseFloat(gflopsCore));
+					
+					this.prozessor.setGflopsComputer(Float.parseFloat(gflopsComputer));
+					break;
+				}
+			}
 		} catch (Exception e) {
-			System.err.println("htmlunit Error");
+			System.err.println("htmlunit Boinc Error");
 			e.printStackTrace();
 		}
 	}
@@ -107,15 +131,17 @@ public class Performance {
 }
 
 class CPU {
-	String modelname;
-	String model;
-	int stepping;
-	float cpumhz;
-	int cpufamily;
-	String l1dcache;
-	String l1icache;
-	String l2cache;
-	String l3cache;
+	private String modelname;
+	private String model;
+	private int stepping;
+	private float cpumhz;
+	private int cpufamily;
+	private String l1dcache;
+	private String l1icache;
+	private String l2cache;
+	private String l3cache;
+	private float gflopsCore;
+	private float gflopsComputer;
 
 	public CPU(String modelname, String model, int stepping, float cpumhz, int cpufamily, String l1dcache,
 			String l1icache, String l2cache, String l3cache) {
@@ -128,5 +154,97 @@ class CPU {
 		this.l1icache = l1icache;
 		this.l2cache = l2cache;
 		this.l3cache = l3cache;
+	}
+
+	public String toString() {
+		return "This CPU :" + this.modelname + " -- GFlops pro Computer:" + this.gflopsComputer;
+	}
+
+	public String getModelname() {
+		return modelname;
+	}
+
+	public void setModelname(String modelname) {
+		this.modelname = modelname;
+	}
+
+	public String getModel() {
+		return model;
+	}
+
+	public void setModel(String model) {
+		this.model = model;
+	}
+
+	public int getStepping() {
+		return stepping;
+	}
+
+	public void setStepping(int stepping) {
+		this.stepping = stepping;
+	}
+
+	public float getCpumhz() {
+		return cpumhz;
+	}
+
+	public void setCpumhz(float cpumhz) {
+		this.cpumhz = cpumhz;
+	}
+
+	public int getCpufamily() {
+		return cpufamily;
+	}
+
+	public void setCpufamily(int cpufamily) {
+		this.cpufamily = cpufamily;
+	}
+
+	public String getL1dcache() {
+		return l1dcache;
+	}
+
+	public void setL1dcache(String l1dcache) {
+		this.l1dcache = l1dcache;
+	}
+
+	public String getL1icache() {
+		return l1icache;
+	}
+
+	public void setL1icache(String l1icache) {
+		this.l1icache = l1icache;
+	}
+
+	public String getL2cache() {
+		return l2cache;
+	}
+
+	public void setL2cache(String l2cache) {
+		this.l2cache = l2cache;
+	}
+
+	public String getL3cache() {
+		return l3cache;
+	}
+
+	public void setL3cache(String l3cache) {
+		this.l3cache = l3cache;
+	}
+
+	public float getGflopsCore() {
+		return gflopsCore;
+	}
+
+	public void setGflopsCore(float gflopsCore) {
+		this.gflopsCore = gflopsCore;
+	}
+
+	public float getGflopsComputer() {
+		return gflopsComputer;
+	}
+
+	public void setGflopsComputer(float gflopsComputer) {
+		this.gflopsComputer = gflopsComputer;
 	}
 }
