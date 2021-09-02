@@ -1,0 +1,19 @@
+
+Notizen
+- Parallelität (Buch Tanenbaum)
+- Multicomputing / Multiprozessor
+- Sysbench Funktionalität: https://wiki.ubuntuusers.de/Benchmarks/#Mikro-Benchmarks
+- KW 2003 Einführung in die Informatik: Seite 13 – 19 relevant !
+- CPU Informationen BBC Bitsize: https://www.bbc.co.uk/bitesize/guides/zr8kt39/revision/5
+- Informationen RAM zu CPU Performance: https://de.quora.com/Warum-wird-der-Rechner-nicht-bedeutend-schneller-nach-einem-Upgrade-des-Arbeitsspeichers-auf-32GB
+- Literatur: Benchmarking Quantum Computers and the Impact of Quantum Noise --> FLOPS, QUIPS (37)
+- Literatur: A New Way to measure computer performance --> QUIPS (15)
+- Literatur: Multithreading Thema
+- Literatur: Overview of the SPEC Benchmark (viel Geschichte) (30) + https://www.spec.org/cpu2017/Docs/overview.html#Q2
+- Benchmark GCP
+- Scalable Heterogeneous computing (SHOC)
+- Literatur: Predicting Computer Performance based on Hardware Configuration using mnn (4)
+- RAM Theorie https://www.makeuseof.com/tag/quick-dirty-guide-ram-need-know/ + https://www.dell.com/support/kbdoc/de-de/000129805/welche-auswirkungen-der-arbeitsspeicher-ram-auf-die-systemleistung-hat
+- CPU Taktfrequenz Intel https://www.intel.de/content/www/de/de/gaming/resources/cpu-clock-speed.html
+- Abfrage bei SPEC https://www.spec.org/cgi-bin/osgresults?conf=all
+- GPU CPU: Bitcoin https://en.bitcoin.it/wiki/Why_a_GPU_mines_faster_than_a_CPU
