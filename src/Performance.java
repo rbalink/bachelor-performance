@@ -126,6 +126,34 @@ public class Performance {
 			System.err.println("htmlunit Boinc Error");
 			e.printStackTrace();
 		}
+		
+		// passmark Software
+		//
+		String cpuNameKurz = "i5-4460";
+		
+		try {
+			final WebClient webClient = new WebClient();
+			String passmarkSearchHttps = "https://www.passmark.com/search/zoomsearch.php?zoom_query=" + cpuNameKurz;
+			System.out.println(passmarkSearchHttps);
+			final HtmlPage page = webClient.getPage(passmarkSearchHttps);
+			DomNodeList<DomElement> versuch = page.getElementsByTagName("table");
+			HtmlTable table = (HtmlTable) versuch.get(0);
+
+			for (int i = 0; i < table.getRowCount(); i++) {
+				String cpuName = table.getRow(i).getCell(0).asNormalizedText();
+				if (cpuName.contains(testCPU)) {
+					String gflopsCore = table.getRow(i).getCell(3).asNormalizedText();
+					String gflopsComputer = table.getRow(i).getCell(4).asNormalizedText();
+					this.prozessor.setGflopsCore(Float.parseFloat(gflopsCore));
+					
+					this.prozessor.setGflopsComputer(Float.parseFloat(gflopsComputer));
+					break;
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("htmlunit Boinc Error");
+			e.printStackTrace();
+		}
 	}
 
 }
