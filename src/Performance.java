@@ -4,11 +4,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.DomText;
+import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTable;
 
@@ -25,13 +29,14 @@ public class Performance {
 
 	public static void main(String[] args) {
 		Performance performance = new Performance();
-		performance.getHardwareInformation();
+		//performance.getHardwareInformation();
 
 		// TODO: what if terminal language is english?
 
 		// online CPU Database (boinc rosetta GFLOPS)
 		performance.scrapingDatabase();
-		System.out.println(performance.prozessor.toString());
+		
+		// System.out.println(performance.prozessor.toString());
 
 		// external postgres database
 		// performance.externalDatabase();
@@ -98,13 +103,25 @@ public class Performance {
 
 	public void scrapingDatabase() {
 		java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
-
+		
+		//boincDatabase();
+		//passmarkDatabase();
+		//userbenchmarkDatabase();
+		//geekbenchDatabase();
+		cpubossDatabase();
+		
+		//todo openbenchmarking
+		
+	}
+	
+	// Boinc Bakerlab Rosetta MFLOPS
+	// TODO: bei mehreren Eintraegen
+	// TODO String generisch anpassen
+	private void boincDatabase(){
 		String testCPU = "Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz";
 		String testCPU2 = "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz";
 		String testCPU3 = "Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz";
 
-		// Boinc Bakerlab Rosetta MFLOPS
-		// TODO: bei mehreren Eintraegen
 		try {
 			final WebClient webClient = new WebClient();
 			final HtmlPage page = webClient.getPage("https://boinc.bakerlab.org/rosetta/cpu_list.php");
@@ -126,37 +143,138 @@ public class Performance {
 			System.err.println("htmlunit Boinc Error");
 			e.printStackTrace();
 		}
+	}
+
+	// passmark Software (cpubenchmark)
+	// passMark PerformanceTestv10 Score
+	// TODO: Add Format CPU Name Kurz !
+	// TODO: Add to Schema
+	// TODO: Check ob der Name eindeutig ist !
+	// TODO: RAM
+	private void passmarkDatabase() {
+		String cpuNameKurz = "i5-4460 ";
+		String gHZ = "3.20";
+
+		try {
+			final WebClient webClient = new WebClient();
+			webClient.getOptions().setThrowExceptionOnScriptError(false);
+			final HtmlPage result = webClient.getPage("https://www.cpubenchmark.net/cpu_list.php");
+			DomNodeList<DomElement> domNode = result.getElementsByTagName("table");
+			HtmlTable table = (HtmlTable) domNode.get(1);
+			
+			for (int i = 0; i < table.getRowCount(); i++) {
+				if (table.getRow(i).getCell(0).asNormalizedText().contains(cpuNameKurz)
+						&& table.getRow(i).getCell(0).asNormalizedText().contains(gHZ)) {
+					String passmarkScore = table.getRow(i).getCell(1).asNormalizedText();
+					String passmarkRanking = table.getRow(i).getCell(2).asNormalizedText();
+					//TODO Add to Schema
+					System.out.println("Passmark Score: "+passmarkScore+" --- Ranking: "+passmarkRanking);
+				} 
+			}
+
+		} catch (Exception e) {
+			System.err.println("htmlunit PassMark Error");
+			e.printStackTrace();
+		}
 		
-		// passmark Software
-		//
+		//RAM
+		
+		//https://www.memorybenchmark.net/ram_list.php
+		//https://www.memorybenchmark.net/ram_list-ddr3.php
+		//https://www.memorybenchmark.net/ram_list-ddr2.php
+		
+	}
+	
+	// userbenchmark
+	//TODO: Add Format CPU Name Kurz !
+	// Prozentuale Werte
+	//TODO: RAM
+	private void userbenchmarkDatabase() {
 		String cpuNameKurz = "i5-4460";
 		
 		try {
 			final WebClient webClient = new WebClient();
-			String passmarkSearchHttps = "https://www.passmark.com/search/zoomsearch.php?zoom_query=" + cpuNameKurz;
-			System.out.println(passmarkSearchHttps);
-			final HtmlPage page = webClient.getPage(passmarkSearchHttps);
-			DomNodeList<DomElement> versuch = page.getElementsByTagName("table");
-			HtmlTable table = (HtmlTable) versuch.get(0);
+			webClient.getOptions().setThrowExceptionOnScriptError(false);
+			final HtmlPage result = webClient.getPage("https://cpu.userbenchmark.com/Search?searchTerm="+cpuNameKurz);
+			//get link of first element found
+			List<DomAttr> liste = result.getByXPath("//div/div/a[contains(@class, \"tl-tag\")][1]/@href");
+			final HtmlPage cpupage = webClient.getPage(liste.get(0).getValue());
+			DomText percentage = (DomText) cpupage.getByXPath("//thead/tr[1]/td[2]/div/a/text()").get(0);
+			DomText cpuMemory = (DomText) cpupage.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[1]/td[2]/span/text()").get(0);
+			DomText cpuOneCore = (DomText) cpupage.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[2]/td[2]/span/text()").get(0);
+			DomText cpuTwoCore = (DomText) cpupage.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[3]/td[2]/span/text()").get(0);
+			DomText cpuQuadCore = (DomText) cpupage.getByXPath("//thead/tr[1]/td[4]/table/tbody/tr[1]/td[2]/span/text()").get(0);
+			DomText cpuOctaCore = (DomText) cpupage.getByXPath("//thead/tr[1]/td[4]/table/tbody/tr[2]/td[2]/span/text()").get(0);
+			String percentageValue = percentage.asNormalizedText();
+			String memoryValue = cpuMemory.asNormalizedText();
+			String oneCoreValue = cpuOneCore.asNormalizedText();
+			String twoCoreValue = cpuTwoCore.asNormalizedText();
+			String quadCoreValue = cpuQuadCore.asNormalizedText();
+			String octaCoreValue = cpuOctaCore.asNormalizedText();
+			
+			System.out.println("CPU Userbenchmark: Prozent: " + percentageValue + "% --- Speicher: " + memoryValue
+					+ " --- 1 Kern: " + oneCoreValue + " --- 2 Kern: " + twoCoreValue + " --- 4 Kern: " + quadCoreValue
+					+ " --- 8 Kern: " + octaCoreValue);
 
-			for (int i = 0; i < table.getRowCount(); i++) {
-				String cpuName = table.getRow(i).getCell(0).asNormalizedText();
-				if (cpuName.contains(testCPU)) {
-					String gflopsCore = table.getRow(i).getCell(3).asNormalizedText();
-					String gflopsComputer = table.getRow(i).getCell(4).asNormalizedText();
-					this.prozessor.setGflopsCore(Float.parseFloat(gflopsCore));
-					
-					this.prozessor.setGflopsComputer(Float.parseFloat(gflopsComputer));
-					break;
-				}
-			}
 		} catch (Exception e) {
-			System.err.println("htmlunit Boinc Error");
+			System.err.println("htmlunit userbenchmark Error");
+			e.printStackTrace();
+		}
+		
+		//https://ram.userbenchmark.com/SpeedTest/46954/Kingston-99U5403-067A00LF-2x4GB
+		
+	}
+
+	//TODO: Bug multiCoreValue
+	private void geekbenchDatabase() {
+		String cpuNameKurz = "i5-4460";
+		String gHZ = "3.2";
+		
+		try {
+			final WebClient webClient = new WebClient();
+			webClient.getOptions().setThrowExceptionOnScriptError(false);
+			final HtmlPage result = webClient.getPage("https://browser.geekbench.com/processor-benchmarks");
+			DomNodeList<DomElement> domNode = result.getElementsByTagName("table");
+			String singleCoreValue = geekbenchLoop((HtmlTable) domNode.get(0), cpuNameKurz, gHZ);
+			String multiCoreValue = geekbenchLoop((HtmlTable) domNode.get(1), cpuNameKurz, gHZ);
+			System.out.println("Single Core Value: "+singleCoreValue+" --- Multi Core Value: "+multiCoreValue);
+
+		} catch (Exception e) {
+			System.err.println("htmlunit Geekbench Error");
 			e.printStackTrace();
 		}
 	}
+	
+	private String geekbenchLoop(HtmlTable table, String cpuNameKurz, String gHz) {
+		for (int i = 0; i < table.getRowCount(); i++) {
+			if (table.getRow(i).getCell(0).asNormalizedText().contains(cpuNameKurz)
+					&& table.getRow(i).getCell(0).asNormalizedText().contains(gHz)) {
+				return table.getRow(i).getCell(1).asNormalizedText();
+			}
+		}
+		return "";
+	}
+	
+	// cpuBoss
+	private void cpubossDatabase(){
+		String cpuNameKurz = "i5-4460";
+		String gHZ = "3.20";
+		
+		try {
+			final WebClient webClient = new WebClient();
+			webClient.getOptions().setThrowExceptionOnScriptError(false);
+			final HtmlPage result = webClient.getPage("http://cpuboss.com/");
+			HtmlInput input = result.getHtmlElementById("");
+			//DomNodeList<DomElement> domNode = result.getElementsByTagName("table");
+				
+		} catch (Exception e) {
+			System.err.println("htmlunit cpuboss Error");
+			e.printStackTrace();
+		}
+	}
+	
+}	
 
-}
 
 class CPU {
 	private String modelname;
