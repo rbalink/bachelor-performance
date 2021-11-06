@@ -123,7 +123,7 @@ public class Performance {
 		passmarkDatabase();
 		userbenchmarkDatabase();
 		geekbenchDatabase();
-		specBenchmark();
+		//specBenchmark();
 
 		// todo openbenchmarking
 
@@ -137,6 +137,14 @@ public class Performance {
 		String testCPU = "Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz";
 		String testCPU2 = "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz";
 		String testCPU3 = "Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz";
+		
+		String boincString = "";
+		if(testCPU.contains("Intel Core")){
+			boincString = testCPU.replace("Intel Core", "Intel(R) Core(TM)") + "CPU @ "+pd.getCpumhz()+"GHz";
+			System.out.println(boincString);
+		}else if(testCPU.contains("AMD")){
+			
+		}
 
 		try {
 			final WebClient webClient = new WebClient();
