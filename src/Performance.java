@@ -26,7 +26,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.dom.Node;
 
 public class Performance {
 	final Logger log = Logger.getLogger("Performance");
-	final String url = "jdbc:postgresql://35.234.64.171:5432/performance";
+	final String url = "jdbc:postgresql://35.234.103.130:5432/performance";
 	final String user = "postgres";
 	final String password = "geheim";
 	HashMap<String, String> lscpu;
