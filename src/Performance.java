@@ -66,8 +66,10 @@ public class Performance {
 					Float.parseFloat(lscpu.get("CPU MHz")), Integer.parseInt(lscpu.get("Prozessorfamilie")), "Test", "", "",
 					"");
 			
-			readerRAM();
-			
+			//TODO:
+			//readerRAM();
+			//readerDisk();
+			System.out.println("break");
 			
 		} catch (Exception e) {
 			System.err.println("Hardware Information Problems");
@@ -126,6 +128,33 @@ public class Performance {
 
 		} catch (Exception e) {
 			System.err.println("Couldn't read from Terminal - lshw");
+			e.printStackTrace();
+		}
+	}
+	
+	//TODO: Disk
+	public void readerDisk() {
+		log.info("Reading Disk data");
+		try {
+			ProcessBuilder builder = new ProcessBuilder();
+			String text;
+
+			// list ram info
+			builder.command("bash", "-c", "sudo lshw -c memory");
+
+			// read from terminal
+			Process process = builder.start();
+			BufferedReader read = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+			while ((text = read.readLine()) != null) {
+				System.out.println(text);
+				//TODO:
+			}
+
+			process.destroy();
+
+		} catch (Exception e) {
+			System.err.println("Couldn't read from Terminal - DISK");
 			e.printStackTrace();
 		}
 	}
