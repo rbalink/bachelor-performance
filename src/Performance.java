@@ -8,21 +8,17 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.DomText;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlDivision;
-import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSpan;
 import com.gargoylesoftware.htmlunit.html.HtmlTable;
-import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
-import com.gargoylesoftware.htmlunit.html.HtmlTableDataCell;
-import com.gargoylesoftware.htmlunit.javascript.host.dom.Node;
 
 public class Performance {
 	final Logger log = Logger.getLogger("Performance");
@@ -42,9 +38,9 @@ public class Performance {
 
 	public static void main(String[] args) {
 		Performance performance = new Performance();
-		// performance.getHardwareInformation();
+		performance.getHardwareInformation();
 
-		performance.dummyCPU();
+		//performance.dummyCPU();
 		performance.scrapingDatabase();
 		
 		// performance.externalDatabase();
@@ -59,12 +55,29 @@ public class Performance {
 	public void getHardwareInformation() {
 		log.info("Reading Hardware Data from Computer");
 		try {
-
 			if (!(System.getProperty("os.name").equals("Linux"))) {
 				System.err.println("The operating system for this program should be Linux!");
 				throw new Exception();
 			}
-
+			
+			readerCPU();
+			
+			pd = new PerformanceData(lscpu.get("Modellname"), lscpu.get("Modell"), Integer.parseInt(lscpu.get("Stepping")),
+					Float.parseFloat(lscpu.get("CPU MHz")), Integer.parseInt(lscpu.get("Prozessorfamilie")), "Test", "", "",
+					"");
+			
+			readerRAM();
+			
+			
+		} catch (Exception e) {
+			System.err.println("Hardware Information Problems");
+			e.printStackTrace();
+		}
+	}
+	
+	public void readerCPU() {
+		log.info("Reading CPU data");
+		try {
 			ProcessBuilder builder = new ProcessBuilder();
 			String text;
 
@@ -81,16 +94,40 @@ public class Performance {
 				this.lscpu.put(parts[0], parts[1]);
 			}
 
-			int exit = process.waitFor();
+			process.destroy();
+			
 
 		} catch (Exception e) {
-			System.err.println("Couldn't read from Terminal");
+			System.err.println("Couldn't read from Terminal - lscpu");
 			e.printStackTrace();
 		}
+	}
+	
+	//TODO: check with MacOS
+	public void readerRAM() {
+		log.info("Reading RAM data");
+		try {
+			ProcessBuilder builder = new ProcessBuilder();
+			String text;
 
-		pd = new PerformanceData(lscpu.get("Modellname"), lscpu.get("Modell"), Integer.parseInt(lscpu.get("Stepping")),
-				Float.parseFloat(lscpu.get("CPU MHz")), Integer.parseInt(lscpu.get("Prozessorfamilie")), "Test", "", "",
-				"");
+			// list ram info
+			builder.command("bash", "-c", "sudo lshw -c memory");
+
+			// read from terminal
+			Process process = builder.start();
+			BufferedReader read = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+			while ((text = read.readLine()) != null) {
+				System.out.println(text);
+				//TODO:
+			}
+
+			process.destroy();
+
+		} catch (Exception e) {
+			System.err.println("Couldn't read from Terminal - lshw");
+			e.printStackTrace();
+		}
 	}
 
 	public void externalDatabase() {
@@ -131,20 +168,8 @@ public class Performance {
 
 	// Boinc Bakerlab Rosetta GFLOPS
 	// TODO: bei mehreren Eintraegen
-	// TODO String = i5-4460 + GHz muss es beinhalten, String zusammenbauen
 	private void boincDatabase() {
 		log.info("Connecting boinc batabase (CPU)");
-		String testCPU = "Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz";
-		String testCPU2 = "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz";
-		String testCPU3 = "Intel(R) Core(TM) i5-8350U CPU @ 1.70GHz";
-		
-		String boincString = "";
-		if(testCPU.contains("Intel Core")){
-			boincString = testCPU.replace("Intel Core", "Intel(R) Core(TM)") + "CPU @ "+pd.getCpumhz()+"GHz";
-			System.out.println(boincString);
-		}else if(testCPU.contains("AMD")){
-			
-		}
 
 		try {
 			final WebClient webClient = new WebClient();
@@ -156,7 +181,7 @@ public class Performance {
 
 			for (int i = 0; i < table.getRowCount(); i++) {
 				String cpuName = table.getRow(i).getCell(0).asNormalizedText();
-				if (cpuName.contains(testCPU)) {
+				if (cpuName.contains(StringUtils.normalizeSpace(pd.getModelname()))) {
 					String gflopsCore = table.getRow(i).getCell(3).asNormalizedText();
 					String gflopsComputer = table.getRow(i).getCell(4).asNormalizedText();
 					this.pd.setGflopsCore(Float.parseFloat(gflopsCore));
@@ -179,7 +204,7 @@ public class Performance {
 	// TODO: Add Format CPU Name Kurz !
 	// TODO: Add to Schema
 	// TODO: Check ob der Name eindeutig ist !
-	// TODO: Information: Für CPU gibt es auch Multi CPU Systems
+	// TODO: Information: Fï¿½r CPU gibt es auch Multi CPU Systems
 	private void passmarkDatabase() {
 		log.info("Connecting passmark database (CPU, HDD, RAM)");
 		pd.setPassMarkBenchmark(new PassMarkBenchmark());
@@ -461,6 +486,8 @@ class PerformanceData {
 	private String l3cache;
 	private float gflopsCore;
 	private float gflopsComputer;
+	private String ramname;
+	private String ramddr;
 	private PassMarkBenchmark pm;
 
 	public PerformanceData(String modelname, String model, int stepping, float cpumhz, int cpufamily, String l1dcache,
@@ -576,6 +603,23 @@ class PerformanceData {
 	public void setGflopsComputer(float gflopsComputer) {
 		this.gflopsComputer = gflopsComputer;
 	}
+
+	public String getRamname() {
+		return ramname;
+	}
+
+	public void setRamname(String ramname) {
+		this.ramname = ramname;
+	}
+
+	public String getRamddr() {
+		return ramddr;
+	}
+
+	public void setRamddr(String ramddr) {
+		this.ramddr = ramddr;
+	}
+	
 }
 
 class PassMarkBenchmark {
