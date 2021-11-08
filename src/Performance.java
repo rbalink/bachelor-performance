@@ -7,9 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
-
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomAttr;
 import com.gargoylesoftware.htmlunit.html.DomElement;
@@ -38,18 +36,20 @@ public class Performance {
 
 	public static void main(String[] args) {
 		Performance performance = new Performance();
-		performance.getHardwareInformation();
+		// performance.getHardwareInformation();
 
-		//performance.dummyCPU();
+		performance.dummyCPU();
 		performance.scrapingDatabase();
 		
-		// performance.externalDatabase();
+		System.out.println(performance.pd.toString());
+		
+		performance.externalDatabase();
 	}
 
 	// dummy for testing
 	public void dummyCPU() {
 		log.info("Creating dummy CPU instance");
-		pd = new PerformanceData("Test", "Testmodell", 0, 0, 0, "Test", "", "", "");
+		pd = new PerformanceData("Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz", "i5-4460", 2, 3.20F, 2, "25", "150", "350", "500");
 	}
 
 	public void getHardwareInformation() {
@@ -59,24 +59,24 @@ public class Performance {
 				System.err.println("The operating system for this program should be Linux!");
 				throw new Exception();
 			}
-			
+
 			readerCPU();
-			
-			pd = new PerformanceData(lscpu.get("Modellname"), lscpu.get("Modell"), Integer.parseInt(lscpu.get("Stepping")),
-					Float.parseFloat(lscpu.get("CPU MHz")), Integer.parseInt(lscpu.get("Prozessorfamilie")), "Test", "", "",
-					"");
-			
-			//TODO:
-			//readerRAM();
-			//readerDisk();
+
+			pd = new PerformanceData(lscpu.get("Modellname"), lscpu.get("Modell"),
+					Integer.parseInt(lscpu.get("Stepping")), Float.parseFloat(lscpu.get("CPU MHz")),
+					Integer.parseInt(lscpu.get("Prozessorfamilie")), "Test", "", "", "");
+
+			// TODO:
+			// readerRAM();
+			// readerDisk();
 			System.out.println("break");
-			
+
 		} catch (Exception e) {
 			System.err.println("Hardware Information Problems");
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void readerCPU() {
 		log.info("Reading CPU data");
 		try {
@@ -97,15 +97,14 @@ public class Performance {
 			}
 
 			process.destroy();
-			
 
 		} catch (Exception e) {
 			System.err.println("Couldn't read from Terminal - lscpu");
 			e.printStackTrace();
 		}
 	}
-	
-	//TODO: check with MacOS
+
+	// TODO: check with MacOS
 	public void readerRAM() {
 		log.info("Reading RAM data");
 		try {
@@ -121,7 +120,7 @@ public class Performance {
 
 			while ((text = read.readLine()) != null) {
 				System.out.println(text);
-				//TODO:
+				// TODO:
 			}
 
 			process.destroy();
@@ -131,8 +130,8 @@ public class Performance {
 			e.printStackTrace();
 		}
 	}
-	
-	//TODO: Disk
+
+	// TODO: Disk
 	public void readerDisk() {
 		log.info("Reading Disk data");
 		try {
@@ -148,7 +147,7 @@ public class Performance {
 
 			while ((text = read.readLine()) != null) {
 				System.out.println(text);
-				//TODO:
+				// TODO:
 			}
 
 			process.destroy();
@@ -160,20 +159,19 @@ public class Performance {
 	}
 
 	public void externalDatabase() {
+
 		log.info("Connecting to external database");
 		try {
 			System.out.println("Loading the Driver");
 			Class.forName("org.postgresql.Driver");
 			System.out.println("Connecting to external PostgreSQL Server");
 			Connection con = DriverManager.getConnection(this.url, this.user, this.password);
-			System.out.println(con.getSchema());
 
 			System.out.println("Successful connection");
 
 			Statement statement = con.createStatement();
-			statement.execute("INSERT INTO postgres (cpu_model_name, cpu_family, cpu_model, stepping, cpu_mhz)"
-					+ "VALUES ('" + this.pd.getModelname() + "'," + this.pd.getCpufamily() + "," + this.pd.getModel()
-					+ "," + this.pd.getStepping() + "," + this.pd.getCpumhz() + ");");
+			statement.execute("INSERT INTO postgres (cpu_model_name, cpu_family, stepping, cpu_mhz)"
+					+ "VALUES ('" + this.pd.getModelname() + "'," + this.pd.getCpufamily() + "," + this.pd.getStepping() + "," + this.pd.getCpumhz() + ");");
 
 			System.out.println("Inserting successful");
 		} catch (Exception e) {
@@ -189,7 +187,7 @@ public class Performance {
 		passmarkDatabase();
 		userbenchmarkDatabase();
 		geekbenchDatabase();
-		//specBenchmark();
+		// specBenchmark();
 
 		// todo openbenchmarking
 
@@ -207,7 +205,7 @@ public class Performance {
 			final HtmlPage page = webClient.getPage("https://boinc.bakerlab.org/rosetta/cpu_list.php");
 			DomNodeList<DomElement> versuch = page.getElementsByTagName("table");
 			HtmlTable table = (HtmlTable) versuch.get(0);
-
+			
 			for (int i = 0; i < table.getRowCount(); i++) {
 				String cpuName = table.getRow(i).getCell(0).asNormalizedText();
 				if (cpuName.contains(StringUtils.normalizeSpace(pd.getModelname()))) {
@@ -216,8 +214,6 @@ public class Performance {
 					this.pd.setGflopsCore(Float.parseFloat(gflopsCore));
 
 					this.pd.setGflopsComputer(Float.parseFloat(gflopsComputer));
-					System.out.println("boinc (CPU): gflops/Kern: " + Float.parseFloat(gflopsCore)
-							+ " --- gflops/Computer: " + Float.parseFloat(gflopsComputer));
 					break;
 				}
 			}
@@ -329,7 +325,6 @@ public class Performance {
 						table.getRow(3).getCell(1).asNormalizedText(), table.getRow(4).getCell(1).asNormalizedText(),
 						table.getRow(5).getCell(1).asNormalizedText(), table.getRow(6).getCell(1).asNormalizedText(),
 						table.getRow(7).getCell(1).asNormalizedText(), table.getRow(8).getCell(1).asNormalizedText());
-				System.out.println(pd.getPassMarkBenchmark().getCPU().toString());
 
 			} else if (com.equals(Component.HDD)) {
 				List<Object> stats = result.getByXPath("//div[contains(@id, 'history')]/table");
@@ -337,10 +332,8 @@ public class Performance {
 				pd.getPassMarkBenchmark().createHDD(passmarkBench, table.getRow(0).getCell(1).asNormalizedText(),
 						table.getRow(1).getCell(1).asNormalizedText(), table.getRow(2).getCell(1).asNormalizedText(),
 						table.getRow(3).getCell(1).asNormalizedText());
-				System.out.println(pd.getPassMarkBenchmark().getHDD().toString());
 			} else if (com.equals(Component.RAM)) {
 				pd.getPassMarkBenchmark().getRAM().setPmScore(passmarkBench);
-				System.out.println(pd.getPassMarkBenchmark().getRAM().toString());
 			}
 
 			webClient.close();
@@ -359,26 +352,24 @@ public class Performance {
 		userbenchmarkRedirect(Component.HDD);
 		log.info("userbenchmark done");
 	}
-	
-	private void userbenchmarkRedirect(Component com){
+
+	private void userbenchmarkRedirect(Component com) {
 		log.info("found " + com.toString() + " - reading data");
 		String urlName = "";
-		if(com.equals(Component.CPU)){
+		if (com.equals(Component.CPU)) {
 			urlName = "i5-4460";
-		}else if(com.equals(Component.RAM)){
+		} else if (com.equals(Component.RAM)) {
 			urlName = "Kingston 99U5403-067.A00LF 4GB";
-		}else if(com.equals(Component.HDD)){
+		} else if (com.equals(Component.HDD)) {
 			urlName = "Samsung SSD 750 EVO 500GB";
 		}
-		
-		
+
 		try {
 			final WebClient webClient = new WebClient();
 			webClient.getOptions().setCssEnabled(false);
 			webClient.getOptions().setJavaScriptEnabled(false);
 			webClient.getOptions().setThrowExceptionOnScriptError(false);
 			final HtmlPage result = webClient.getPage("https://cpu.userbenchmark.com/Search?searchTerm=" + urlName);
-			// get link of first element found
 			List<DomAttr> liste = result.getByXPath("//div/div/a[contains(@class, \"tl-tag\")][1]/@href");
 			final HtmlPage cpupage = webClient.getPage(liste.get(0).getValue());
 			if (com.equals(Component.CPU)) {
@@ -393,51 +384,35 @@ public class Performance {
 						.getByXPath("//thead/tr[1]/td[4]/table/tbody/tr[1]/td[2]/span/text()").get(0);
 				DomText cpuOctaCore = (DomText) cpupage
 						.getByXPath("//thead/tr[1]/td[4]/table/tbody/tr[2]/td[2]/span/text()").get(0);
-				String percentageValue = percentage.asNormalizedText();
-				String memoryValue = cpuMemory.asNormalizedText();
-				String oneCoreValue = cpuOneCore.asNormalizedText();
-				String twoCoreValue = cpuTwoCore.asNormalizedText();
-				String quadCoreValue = cpuQuadCore.asNormalizedText();
-				String octaCoreValue = cpuOctaCore.asNormalizedText();
 
-				System.out.println("Userbenchmark CPU: Score: " + percentageValue + "% --- Speicher: " + memoryValue
-						+ " --- 1 Kern: " + oneCoreValue + " --- 2 Kern: " + twoCoreValue + " --- 4 Kern: "
-						+ quadCoreValue + " --- 8 Kern: " + octaCoreValue);
-			}else if(com.equals(Component.RAM)){
-				//TODO: rename variables bc of confusion
+				pd.getUb().createCPU(percentage.asNormalizedText(), cpuMemory.asNormalizedText(),
+						cpuOneCore.asNormalizedText(), cpuTwoCore.asNormalizedText(), cpuQuadCore.asNormalizedText(),
+						cpuOctaCore.asNormalizedText());
+			} else if (com.equals(Component.RAM)) {
 				DomText percentage = (DomText) cpupage.getByXPath("//thead/tr[1]/td[2]/div/a/text()").get(0);
-				DomText cpuMemory = (DomText) cpupage
-						.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[1]/td[2]/span/text()").get(0);
-				DomText cpuOneCore = (DomText) cpupage
-						.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[2]/td[2]/span/text()").get(0);
-				DomText cpuTwoCore = (DomText) cpupage
-						.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[3]/td[2]/span/text()").get(0);
-				DomText cpuOctaCore = (DomText) cpupage
+				DomText read = (DomText) cpupage.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[1]/td[2]/span/text()")
+						.get(0);
+				DomText write = (DomText) cpupage.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[2]/td[2]/span/text()")
+						.get(0);
+				DomText mixed = (DomText) cpupage.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[3]/td[2]/span/text()")
+						.get(0);
+				DomText latenz = (DomText) cpupage
 						.getByXPath("//thead/tr[1]/td[5]/table/tbody/tr[2]/td[1]/span[2]/text()").get(0);
-				String percentageValue = percentage.asNormalizedText();
-				String memoryValue = cpuMemory.asNormalizedText();
-				String oneCoreValue = cpuOneCore.asNormalizedText();
-				String twoCoreValue = cpuTwoCore.asNormalizedText();
-				String octaCoreValue = cpuOctaCore.asNormalizedText();
 
-				System.out.println("Userbenchmark RAM: Score: " + percentageValue + "% --- Read GB/s: " + memoryValue
-						+ " --- Write GB/s: " + oneCoreValue + " --- Mixed GB/s: " + twoCoreValue + " --- Latenz (ns): " + octaCoreValue);
-			}else if(com.equals(Component.HDD)){
-				//TODO: rename variables bc of confusion
+				pd.getUb().createRAM(percentage.asNormalizedText(), read.asNormalizedText(), write.asNormalizedText(),
+						mixed.asNormalizedText(), latenz.asNormalizedText());
+
+			} else if (com.equals(Component.HDD)) {
 				DomText percentage = (DomText) cpupage.getByXPath("//thead/tr[1]/td[2]/div/a/text()").get(0);
-				DomText cpuMemory = (DomText) cpupage
-						.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[1]/td[2]/span/text()").get(0);
-				DomText cpuOneCore = (DomText) cpupage
-						.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[2]/td[2]/span/text()").get(0);
-				DomText cpuTwoCore = (DomText) cpupage
-						.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[3]/td[2]/span/text()").get(0);
-				String percentageValue = percentage.asNormalizedText();
-				String memoryValue = cpuMemory.asNormalizedText();
-				String oneCoreValue = cpuOneCore.asNormalizedText();
-				String twoCoreValue = cpuTwoCore.asNormalizedText();
+				DomText read = (DomText) cpupage.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[1]/td[2]/span/text()")
+						.get(0);
+				DomText write = (DomText) cpupage.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[2]/td[2]/span/text()")
+						.get(0);
+				DomText mixed = (DomText) cpupage.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[3]/td[2]/span/text()")
+						.get(0);
 
-				System.out.println("Userbenchmark HDD/SSD: Score: " + percentageValue + "% --- Read MB/s: " + memoryValue
-						+ " --- Write MB/s: " + oneCoreValue + " --- Mixed MB/s: " + twoCoreValue);
+				pd.getUb().createHDD(percentage.asNormalizedText(), read.asNormalizedText(), write.asNormalizedText(),
+						mixed.asNormalizedText());
 			}
 
 			webClient.close();
@@ -446,7 +421,7 @@ public class Performance {
 			System.err.println("htmlunit userbenchmark Error");
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	// TODO: Bug multiCoreValue
@@ -464,7 +439,8 @@ public class Performance {
 			DomNodeList<DomElement> domNode = result.getElementsByTagName("table");
 			String singleCoreValue = geekbenchLoop((HtmlTable) domNode.get(0), cpuNameKurz, gHZ);
 			String multiCoreValue = geekbenchLoop((HtmlTable) domNode.get(1), cpuNameKurz, gHZ);
-			System.out.println("GeekbenchDB CPU: Single Core Value: " + singleCoreValue + " --- Multi Core Value: " + multiCoreValue);
+			System.out.println("GeekbenchDB CPU: Single Core Value: " + singleCoreValue + " --- Multi Core Value: "
+					+ multiCoreValue);
 
 			webClient.close();
 		} catch (Exception e) {
@@ -483,7 +459,7 @@ public class Performance {
 		return "";
 	}
 
-	private void specBenchmark(){
+	private void specBenchmark() {
 		log.info("spec Benchmark");
 		String cpuNameKurz = "i5-4460";
 
@@ -518,6 +494,7 @@ class PerformanceData {
 	private String ramname;
 	private String ramddr;
 	private PassMarkBenchmark pm;
+	private UserBenchmark ub;
 
 	public PerformanceData(String modelname, String model, int stepping, float cpumhz, int cpufamily, String l1dcache,
 			String l1icache, String l2cache, String l3cache) {
@@ -531,10 +508,7 @@ class PerformanceData {
 		this.l2cache = l2cache;
 		this.l3cache = l3cache;
 		this.pm = new PassMarkBenchmark();
-	}
-
-	public String toString() {
-		return "This CPU :" + this.modelname + " -- GFlops pro Computer:" + this.gflopsComputer;
+		this.ub = new UserBenchmark();
 	}
 
 	public PassMarkBenchmark getPassMarkBenchmark() {
@@ -543,6 +517,14 @@ class PerformanceData {
 
 	public void setPassMarkBenchmark(PassMarkBenchmark pm) {
 		this.pm = pm;
+	}
+
+	public UserBenchmark getUb() {
+		return ub;
+	}
+
+	public void setUb(UserBenchmark ub) {
+		this.ub = ub;
 	}
 
 	public String getModelname() {
@@ -648,7 +630,14 @@ class PerformanceData {
 	public void setRamddr(String ramddr) {
 		this.ramddr = ramddr;
 	}
-	
+
+	public String toString() {
+		return "Alle Werte: \nGFLOPS: " + gflopsComputer + " GLFOPS/Core: " + gflopsCore + " \nPassmark:\n"
+				+ pm.getCPU().toString() + " \n" + pm.getRAM().toString() + " \n" + pm.getHDD().toString()
+				+ " \nUserBenchmark\n" + ub.getCPU().toString() + " \n" + ub.getRAM().toString() + " \n"
+				+ ub.getHDD().toString();
+	}
+
 }
 
 class PassMarkBenchmark {
@@ -846,4 +835,165 @@ class pmHDD {
 				+ sequentialwriteMBs + " - " + "randomseekreadwriteMBs:" + randomseekreadwriteMBs + " - iposMBs:"
 				+ iposMBs;
 	}
+}
+
+class UserBenchmark {
+	public ubCPU cpu;
+	public ubRAM ram;
+	public ubHDD hdd;
+
+	public UserBenchmark() {
+
+	}
+
+	public void createCPU(String score, String memory, String core, String core2, String core4, String core8) {
+		this.cpu = new ubCPU(score, memory, core, core2, core4, core8);
+	}
+
+	public ubCPU getCPU() {
+		return this.cpu;
+	}
+
+	public void createRAM(String score, String read, String write, String mixed, String latenz) {
+		this.ram = new ubRAM(score, read, write, mixed, latenz);
+	}
+
+	public ubRAM getRAM() {
+		return this.ram;
+	}
+
+	public void createHDD(String score, String read, String write, String mixed) {
+		this.hdd = new ubHDD(score, read, write, mixed);
+	}
+
+	public ubHDD getHDD() {
+		return this.hdd;
+	}
+
+}
+
+class ubCPU {
+	private final String score;
+	private final String memory;
+	private final String core;
+	private final String core2;
+	private final String core4;
+	private final String core8;
+
+	public ubCPU(String score, String memory, String core, String core2, String core4, String core8) {
+		this.score = score;
+		this.memory = memory;
+		this.core = core;
+		this.core2 = core2;
+		this.core4 = core4;
+		this.core8 = core8;
+	}
+
+	public String getScore() {
+		return score;
+	}
+
+	public String getMemory() {
+		return memory;
+	}
+
+	public String getCore() {
+		return core;
+	}
+
+	public String getCore2() {
+		return core2;
+	}
+
+	public String getCore4() {
+		return core4;
+	}
+
+	public String getCore8() {
+		return core8;
+	}
+
+	public String toString() {
+		return "Userbenchmark CPU: Score: " + score + "% --- Speicher: " + memory + " --- 1 Kern: " + core
+				+ " --- 2 Kern: " + core2 + " --- 4 Kern: " + core4 + " --- 8 Kern: " + core8;
+	}
+
+}
+
+class ubRAM {
+	private String score;
+	private String read;
+	private String write;
+	private String mixed;
+	private String latenz;
+
+	public ubRAM(String score, String read, String write, String mixed, String latenz) {
+		this.score = score;
+		this.read = read;
+		this.write = write;
+		this.mixed = mixed;
+		this.latenz = latenz;
+	}
+
+	public String getScore() {
+		return score;
+	}
+
+	public String getRead() {
+		return read;
+	}
+
+	public String getWrite() {
+		return write;
+	}
+
+	public String getMixed() {
+		return mixed;
+	}
+
+	public String getLatenz() {
+		return latenz;
+	}
+
+	public String toString() {
+		return "Userbenchmark RAM: Score: " + this.score + "% --- Read GB/s: " + this.read + " --- Write GB/s: "
+				+ this.write + " --- Mixed GB/s: " + this.mixed + " --- Latenz (ns): " + this.latenz;
+	}
+
+}
+
+class ubHDD {
+	private String score;
+	private String read;
+	private String write;
+	private String mixed;
+
+	public ubHDD(String score, String read, String write, String mixed) {
+		this.score = score;
+		this.read = read;
+		this.write = write;
+		this.mixed = mixed;
+	}
+
+	public String getScore() {
+		return score;
+	}
+
+	public String getRead() {
+		return read;
+	}
+
+	public String getWrite() {
+		return write;
+	}
+
+	public String getMixed() {
+		return mixed;
+	}
+
+	public String toString() {
+		return "Userbenchmark HDD/SSD: Score: " + this.score + "% --- Read MB/s: " + this.read + " --- Write MB/s: "
+				+ this.write + " --- Mixed MB/s: " + this.mixed;
+	}
+
 }
