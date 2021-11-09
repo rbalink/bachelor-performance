@@ -40,16 +40,17 @@ public class Performance {
 
 		performance.dummyCPU();
 		performance.scrapingDatabase();
-		
+
 		System.out.println(performance.pd.toString());
-		
+
 		performance.externalDatabase();
 	}
 
 	// dummy for testing
 	public void dummyCPU() {
 		log.info("Creating dummy CPU instance");
-		pd = new PerformanceData("Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz", "i5-4460", 2, 3.20F, 2, "25", "150", "350", "500");
+		pd = new PerformanceData("Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz", "i5-4460", 2, 3.2, 2, "25", "150", "350",
+				"500");
 	}
 
 	public void getHardwareInformation() {
@@ -63,7 +64,7 @@ public class Performance {
 			readerCPU();
 
 			pd = new PerformanceData(lscpu.get("Modellname"), lscpu.get("Modell"),
-					Integer.parseInt(lscpu.get("Stepping")), Float.parseFloat(lscpu.get("CPU MHz")),
+					Integer.parseInt(lscpu.get("Stepping")), Double.parseDouble(lscpu.get("CPU MHz")),
 					Integer.parseInt(lscpu.get("Prozessorfamilie")), "Test", "", "", "");
 
 			// TODO:
@@ -170,8 +171,34 @@ public class Performance {
 			System.out.println("Successful connection");
 
 			Statement statement = con.createStatement();
-			statement.execute("INSERT INTO postgres (cpu_model_name, cpu_family, stepping, cpu_mhz)"
-					+ "VALUES ('" + this.pd.getModelname() + "'," + this.pd.getCpufamily() + "," + this.pd.getStepping() + "," + this.pd.getCpumhz() + ");");
+			statement.execute(
+					"INSERT INTO postgres (cpu_model_name, cpu_family, stepping, cpu_mhz,boinc_cpu_comp, boinc_cpu_core, pm_cpu_score, pm_cpu_intmath, pm_cpu_floatingpm, pm_cpu_prime, pm_cpu_randstso, pm_cpu_encrypt, pm_cpu_datacom, pm_cpu_phy, pm_cpu_exins, pm_cpu_thread, pm_ram_score, pm_ram_latenz, pm_ram_read, pm_ram_write, pm_hdd_score, pm_hdd_sread, pm_hdd_swrite, pm_hdd_rsrw, pm_hdd_ipos, ub_cpu_score, ub_cpu_memory, ub_cpu_core, ub_cpu_core2, ub_cpu_core4, ub_cpu_core8, ub_ram_score, ub_ram_read, ub_ram_write, ub_ram_mixed, ub_ram_latenz, ub_hdd_score, ub_hdd_read, ub_hdd_write, ub_hdd_mixed, gb_cpu_singlecore, gb_cpu_multicore)"
+							+ "VALUES ('" + this.pd.getModelname() + "'," + this.pd.getCpufamily() + ","
+							+ this.pd.getStepping() + "," + this.pd.getCpumhz() + "," + this.pd.getGflopsComputer()
+							+ "," + this.pd.getGflopsCore() + "," + this.pd.getPm().getCPU().getPmScore() + ","
+							+ this.pd.getPm().getCPU().getIntegerMath() + ","
+							+ this.pd.getPm().getCPU().getFloatingPointMath() + ","
+							+ this.pd.getPm().getCPU().getfindPrimeNumbers() + ","
+							+ this.pd.getPm().getCPU().getRandomStringSorting() + ","
+							+ this.pd.getPm().getCPU().getDataEncryption() + ","
+							+ this.pd.getPm().getCPU().getDataCompression() + ","
+							+ this.pd.getPm().getCPU().getPhysics() + ","
+							+ this.pd.getPm().getCPU().getExtendedInstructions() + ","
+							+ this.pd.getPm().getCPU().getSingleThread() + "," + this.pd.getPm().getRAM().getPmScore()
+							+ "," + this.pd.getPm().getRAM().getLatency() + "," + this.pd.getPm().getRAM().getReadGBs()
+							+ "," + this.pd.getPm().getRAM().getWriteGBs() + "," + this.pd.getPm().getHDD().getPmScore()
+							+ "," + this.pd.getPm().getHDD().getSequentialreadMBs() + ","
+							+ this.pd.getPm().getHDD().getSequentialwriteMBs() + ","
+							+ this.pd.getPm().getHDD().getRandomseekreadwriteMBs() + ","
+							+ this.pd.getPm().getHDD().getIposMBs() + "," + this.pd.getUb().getCPU().getScore() + ","
+							+ this.pd.getUb().getCPU().getMemory() + "," + this.pd.getUb().getCPU().getCore() + ","
+							+ this.pd.getUb().getCPU().getCore2() + "," + this.pd.getUb().getCPU().getCore4() + ","
+							+ this.pd.getUb().getCPU().getCore8() + "," + this.pd.getUb().getRAM().getScore() + ","
+							+ this.pd.getUb().getRAM().getRead() + "," + this.pd.getUb().getRAM().getWrite() + ","
+							+ this.pd.getUb().getRAM().getMixed() + "," + this.pd.getUb().getRAM().getLatenz() + ","
+							+ this.pd.getUb().getHDD().getScore() + "," + this.pd.getUb().getHDD().getRead() + ","
+							+ this.pd.getUb().getHDD().getWrite() + "," + this.pd.getUb().getHDD().getMixed() + ","
+							+ this.pd.getGbsingle() + "," + this.pd.getGbmulti() + ");");
 
 			System.out.println("Inserting successful");
 		} catch (Exception e) {
@@ -205,7 +232,7 @@ public class Performance {
 			final HtmlPage page = webClient.getPage("https://boinc.bakerlab.org/rosetta/cpu_list.php");
 			DomNodeList<DomElement> versuch = page.getElementsByTagName("table");
 			HtmlTable table = (HtmlTable) versuch.get(0);
-			
+
 			for (int i = 0; i < table.getRowCount(); i++) {
 				String cpuName = table.getRow(i).getCell(0).asNormalizedText();
 				if (cpuName.contains(StringUtils.normalizeSpace(pd.getModelname()))) {
@@ -287,9 +314,9 @@ public class Performance {
 						&& table.getRow(i).getCell(0).asNormalizedText().contains(name2)) {
 					HtmlAnchor html = (HtmlAnchor) table.getRow(i).getCell(0).getFirstChild();
 					if (com.equals(Component.RAM)) {
-						pd.getPassMarkBenchmark().createRAM(table.getRow(i).getCell(1).asNormalizedText(),
-								table.getRow(i).getCell(2).asNormalizedText(),
-								table.getRow(i).getCell(3).asNormalizedText());
+						pd.getPm().createRAM(Double.parseDouble(table.getRow(i).getCell(1).asNormalizedText()),
+								Double.parseDouble(table.getRow(i).getCell(2).asNormalizedText()),
+								Double.parseDouble(table.getRow(i).getCell(3).asNormalizedText()));
 					}
 					passmarkRedirecting(passmarkUrlBeginning + html.getHrefAttribute().split(".php")[1], com);
 					break;
@@ -320,20 +347,32 @@ public class Performance {
 			if (com.equals(Component.CPU)) {
 				List<Object> stats = result.getByXPath("//div[contains(@id, 'history')]/table");
 				HtmlTable table = (HtmlTable) stats.get(0);
-				pd.getPassMarkBenchmark().createCPU(passmarkBench, table.getRow(0).getCell(1).asNormalizedText(),
-						table.getRow(1).getCell(1).asNormalizedText(), table.getRow(2).getCell(1).asNormalizedText(),
-						table.getRow(3).getCell(1).asNormalizedText(), table.getRow(4).getCell(1).asNormalizedText(),
-						table.getRow(5).getCell(1).asNormalizedText(), table.getRow(6).getCell(1).asNormalizedText(),
-						table.getRow(7).getCell(1).asNormalizedText(), table.getRow(8).getCell(1).asNormalizedText());
+				pd.getPm().createCPU(Double.parseDouble(passmarkBench),
+						Double.parseDouble(
+								table.getRow(0).getCell(1).asNormalizedText().split(" ")[0].replace(",", ".")),
+						Double.parseDouble(
+								table.getRow(1).getCell(1).asNormalizedText().split(" ")[0].replace(",", ".")),
+						Double.parseDouble(table.getRow(2).getCell(1).asNormalizedText().split(" ")[0]),
+						Double.parseDouble(table.getRow(3).getCell(1).asNormalizedText().split(" ")[0]),
+						Double.parseDouble(
+								table.getRow(4).getCell(1).asNormalizedText().split(" ")[0].replace(",", ".")),
+						Double.parseDouble(table.getRow(5).getCell(1).asNormalizedText().split(" ")[0]),
+						Double.parseDouble(table.getRow(6).getCell(1).asNormalizedText().split(" ")[0]),
+						Double.parseDouble(
+								table.getRow(7).getCell(1).asNormalizedText().split(" ")[0].replace(",", ".")),
+						Double.parseDouble(
+								table.getRow(8).getCell(1).asNormalizedText().split(" ")[0].replace(",", ".")));
 
 			} else if (com.equals(Component.HDD)) {
 				List<Object> stats = result.getByXPath("//div[contains(@id, 'history')]/table");
 				HtmlTable table = (HtmlTable) stats.get(0);
-				pd.getPassMarkBenchmark().createHDD(passmarkBench, table.getRow(0).getCell(1).asNormalizedText(),
-						table.getRow(1).getCell(1).asNormalizedText(), table.getRow(2).getCell(1).asNormalizedText(),
-						table.getRow(3).getCell(1).asNormalizedText());
+				pd.getPm().createHDD(Double.parseDouble(passmarkBench),
+						Double.parseDouble(table.getRow(0).getCell(1).asNormalizedText().split(" ")[0]),
+						Double.parseDouble(table.getRow(1).getCell(1).asNormalizedText().split(" ")[0]),
+						Double.parseDouble(table.getRow(2).getCell(1).asNormalizedText().split(" ")[0]),
+						Double.parseDouble(table.getRow(3).getCell(1).asNormalizedText().split(" ")[0]));
 			} else if (com.equals(Component.RAM)) {
-				pd.getPassMarkBenchmark().getRAM().setPmScore(passmarkBench);
+				pd.getPm().getRAM().setPmScore(Double.parseDouble(passmarkBench));
 			}
 
 			webClient.close();
@@ -385,9 +424,12 @@ public class Performance {
 				DomText cpuOctaCore = (DomText) cpupage
 						.getByXPath("//thead/tr[1]/td[4]/table/tbody/tr[2]/td[2]/span/text()").get(0);
 
-				pd.getUb().createCPU(percentage.asNormalizedText(), cpuMemory.asNormalizedText(),
-						cpuOneCore.asNormalizedText(), cpuTwoCore.asNormalizedText(), cpuQuadCore.asNormalizedText(),
-						cpuOctaCore.asNormalizedText());
+				pd.getUb().createCPU(Double.parseDouble(percentage.asNormalizedText()),
+						Double.parseDouble(cpuMemory.asNormalizedText()),
+						Double.parseDouble(cpuOneCore.asNormalizedText()),
+						Double.parseDouble(cpuTwoCore.asNormalizedText()),
+						Double.parseDouble(cpuQuadCore.asNormalizedText()),
+						Double.parseDouble(cpuOctaCore.asNormalizedText()));
 			} else if (com.equals(Component.RAM)) {
 				DomText percentage = (DomText) cpupage.getByXPath("//thead/tr[1]/td[2]/div/a/text()").get(0);
 				DomText read = (DomText) cpupage.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[1]/td[2]/span/text()")
@@ -399,8 +441,9 @@ public class Performance {
 				DomText latenz = (DomText) cpupage
 						.getByXPath("//thead/tr[1]/td[5]/table/tbody/tr[2]/td[1]/span[2]/text()").get(0);
 
-				pd.getUb().createRAM(percentage.asNormalizedText(), read.asNormalizedText(), write.asNormalizedText(),
-						mixed.asNormalizedText(), latenz.asNormalizedText());
+				pd.getUb().createRAM(Double.parseDouble(percentage.asNormalizedText()),
+						Double.parseDouble(read.asNormalizedText()), Double.parseDouble(write.asNormalizedText()),
+						Double.parseDouble(mixed.asNormalizedText()), Double.parseDouble(latenz.asNormalizedText()));
 
 			} else if (com.equals(Component.HDD)) {
 				DomText percentage = (DomText) cpupage.getByXPath("//thead/tr[1]/td[2]/div/a/text()").get(0);
@@ -411,8 +454,9 @@ public class Performance {
 				DomText mixed = (DomText) cpupage.getByXPath("//thead/tr[1]/td[3]/table/tbody/tr[3]/td[2]/span/text()")
 						.get(0);
 
-				pd.getUb().createHDD(percentage.asNormalizedText(), read.asNormalizedText(), write.asNormalizedText(),
-						mixed.asNormalizedText());
+				pd.getUb().createHDD(Double.parseDouble(percentage.asNormalizedText()),
+						Double.parseDouble(read.asNormalizedText()), Double.parseDouble(write.asNormalizedText()),
+						Double.parseDouble(mixed.asNormalizedText()));
 			}
 
 			webClient.close();
@@ -439,6 +483,8 @@ public class Performance {
 			DomNodeList<DomElement> domNode = result.getElementsByTagName("table");
 			String singleCoreValue = geekbenchLoop((HtmlTable) domNode.get(0), cpuNameKurz, gHZ);
 			String multiCoreValue = geekbenchLoop((HtmlTable) domNode.get(1), cpuNameKurz, gHZ);
+			pd.setGbsingle(Double.parseDouble(singleCoreValue));
+			pd.setGbmulti(Double.parseDouble(multiCoreValue));
 			System.out.println("GeekbenchDB CPU: Single Core Value: " + singleCoreValue + " --- Multi Core Value: "
 					+ multiCoreValue);
 
@@ -483,20 +529,22 @@ class PerformanceData {
 	private String modelname;
 	private String model;
 	private int stepping;
-	private float cpumhz;
+	private double cpumhz;
 	private int cpufamily;
 	private String l1dcache;
 	private String l1icache;
 	private String l2cache;
 	private String l3cache;
-	private float gflopsCore;
-	private float gflopsComputer;
+	private double gflopsCore;
+	private double gflopsComputer;
 	private String ramname;
 	private String ramddr;
 	private PassMarkBenchmark pm;
 	private UserBenchmark ub;
+	private double gbsingle;
+	private double gbmulti;
 
-	public PerformanceData(String modelname, String model, int stepping, float cpumhz, int cpufamily, String l1dcache,
+	public PerformanceData(String modelname, String model, int stepping, double cpumhz, int cpufamily, String l1dcache,
 			String l1icache, String l2cache, String l3cache) {
 		this.modelname = modelname;
 		this.model = model;
@@ -511,7 +559,7 @@ class PerformanceData {
 		this.ub = new UserBenchmark();
 	}
 
-	public PassMarkBenchmark getPassMarkBenchmark() {
+	public PassMarkBenchmark getPm() {
 		return this.pm;
 	}
 
@@ -551,11 +599,11 @@ class PerformanceData {
 		this.stepping = stepping;
 	}
 
-	public float getCpumhz() {
+	public double getCpumhz() {
 		return cpumhz;
 	}
 
-	public void setCpumhz(float cpumhz) {
+	public void setCpumhz(int cpumhz) {
 		this.cpumhz = cpumhz;
 	}
 
@@ -599,7 +647,7 @@ class PerformanceData {
 		this.l3cache = l3cache;
 	}
 
-	public float getGflopsCore() {
+	public double getGflopsCore() {
 		return gflopsCore;
 	}
 
@@ -607,7 +655,7 @@ class PerformanceData {
 		this.gflopsCore = gflopsCore;
 	}
 
-	public float getGflopsComputer() {
+	public double getGflopsComputer() {
 		return gflopsComputer;
 	}
 
@@ -631,6 +679,22 @@ class PerformanceData {
 		this.ramddr = ramddr;
 	}
 
+	public double getGbsingle() {
+		return gbsingle;
+	}
+
+	public void setGbsingle(double gbsingle) {
+		this.gbsingle = gbsingle;
+	}
+
+	public double getGbmulti() {
+		return gbmulti;
+	}
+
+	public void setGbmulti(double gbmulti) {
+		this.gbmulti = gbmulti;
+	}
+
 	public String toString() {
 		return "Alle Werte: \nGFLOPS: " + gflopsComputer + " GLFOPS/Core: " + gflopsCore + " \nPassmark:\n"
 				+ pm.getCPU().toString() + " \n" + pm.getRAM().toString() + " \n" + pm.getHDD().toString()
@@ -649,9 +713,9 @@ class PassMarkBenchmark {
 
 	}
 
-	public void createCPU(String pmScore, String integerMath, String floatingPointMath, String findPrimeNumbers,
-			String randomStringSorting, String dataEncryption, String dataCompression, String physics,
-			String extendedInstructions, String singleThread) {
+	public void createCPU(double pmScore, double integerMath, double floatingPointMath, double findPrimeNumbers,
+			double randomStringSorting, double dataEncryption, double dataCompression, double physics,
+			double extendedInstructions, double singleThread) {
 		this.cpu = new pmCPU(pmScore, integerMath, floatingPointMath, findPrimeNumbers, randomStringSorting,
 				dataEncryption, dataCompression, physics, extendedInstructions, singleThread);
 	}
@@ -660,7 +724,7 @@ class PassMarkBenchmark {
 		return this.cpu;
 	}
 
-	public void createRAM(String latency, String readGBs, String writeGBs) {
+	public void createRAM(double latency, double readGBs, double writeGBs) {
 		this.ram = new pmRAM(latency, readGBs, writeGBs);
 	}
 
@@ -668,8 +732,8 @@ class PassMarkBenchmark {
 		return this.ram;
 	}
 
-	public void createHDD(String pmScore, String sequentialreadMBs, String sequentialwriteMBs,
-			String randomseekreadwriteMBs, String iposMBs) {
+	public void createHDD(double pmScore, double sequentialreadMBs, double sequentialwriteMBs,
+			double randomseekreadwriteMBs, double iposMBs) {
 		this.hdd = new pmHDD(pmScore, sequentialreadMBs, sequentialwriteMBs, randomseekreadwriteMBs, iposMBs);
 	}
 
@@ -680,20 +744,20 @@ class PassMarkBenchmark {
 }
 
 class pmCPU {
-	private final String pmScore;
-	private final String integerMath;
-	private final String floatingPointMath;
-	private final String findPrimeNumbers;
-	private final String randomStringSorting;
-	private final String dataEncryption;
-	private final String dataCompression;
-	private final String physics;
-	private final String extendedInstructions;
-	private final String singleThread;
+	private final double pmScore;
+	private final double integerMath;
+	private final double floatingPointMath;
+	private final double findPrimeNumbers;
+	private final double randomStringSorting;
+	private final double dataEncryption;
+	private final double dataCompression;
+	private final double physics;
+	private final double extendedInstructions;
+	private final double singleThread;
 
-	public pmCPU(String pmScore, String integerMath, String floatingPointMath, String findPrimeNumbers,
-			String randomStringSorting, String dataEncryption, String dataCompression, String physics,
-			String extendedInstructions, String singleThread) {
+	public pmCPU(double pmScore, double integerMath, double floatingPointMath, double findPrimeNumbers,
+			double randomStringSorting, double dataEncryption, double dataCompression, double physics,
+			double extendedInstructions, double singleThread) {
 		this.pmScore = pmScore;
 		this.integerMath = integerMath;
 		this.floatingPointMath = floatingPointMath;
@@ -714,55 +778,55 @@ class pmCPU {
 				+ " - SingleThread:" + singleThread;
 	}
 
-	public String getPmScore() {
+	public double getPmScore() {
 		return pmScore;
 	}
 
-	public String getIntegerMath() {
+	public double getIntegerMath() {
 		return integerMath;
 	}
 
-	public String getFloatingPointMath() {
+	public double getFloatingPointMath() {
 		return floatingPointMath;
 	}
 
-	public String getRandomStringSorting() {
+	public double getRandomStringSorting() {
 		return randomStringSorting;
 	}
 
-	public String getDataEncryption() {
+	public double getDataEncryption() {
 		return dataEncryption;
 	}
 
-	public String getDataCompression() {
+	public double getDataCompression() {
 		return dataCompression;
 	}
 
-	public String getPhysics() {
+	public double getPhysics() {
 		return physics;
 	}
 
-	public String getExtendedInstructions() {
+	public double getExtendedInstructions() {
 		return extendedInstructions;
 	}
 
-	public String getSingleThread() {
+	public double getSingleThread() {
 		return singleThread;
 	}
 
-	public String getfindPrimeNumbers() {
+	public double getfindPrimeNumbers() {
 		return findPrimeNumbers;
 	}
 }
 
 class pmRAM {
-	private String pmScore;
-	private final String latency;
-	private final String readGBs;
-	private final String writeGBs;
+	private double pmScore;
+	private final double latency;
+	private final double readGBs;
+	private final double writeGBs;
 
-	public pmRAM(String latency, String readGBs, String writeGBs) {
-		this.pmScore = "";
+	public pmRAM(double latency, double readGBs, double writeGBs) {
+		this.pmScore = 0;
 		this.latency = latency;
 		this.readGBs = readGBs;
 		this.writeGBs = writeGBs;
@@ -773,36 +837,36 @@ class pmRAM {
 				+ writeGBs;
 	}
 
-	public void setPmScore(String pmScore) {
+	public void setPmScore(double pmScore) {
 		this.pmScore = pmScore;
 	}
 
-	public String getPmScore() {
+	public double getPmScore() {
 		return pmScore;
 	}
 
-	public String getLatency() {
+	public double getLatency() {
 		return latency;
 	}
 
-	public String getReadGBs() {
+	public double getReadGBs() {
 		return readGBs;
 	}
 
-	public String getWriteGBs() {
+	public double getWriteGBs() {
 		return writeGBs;
 	}
 }
 
 class pmHDD {
-	private final String pmScore;
-	private final String sequentialreadMBs;
-	private final String sequentialwriteMBs;
-	private final String randomseekreadwriteMBs;
-	private final String iposMBs;
+	private final double pmScore;
+	private final double sequentialreadMBs;
+	private final double sequentialwriteMBs;
+	private final double randomseekreadwriteMBs;
+	private final double iposMBs;
 
-	public pmHDD(String pmScore, String sequentialreadMBs, String sequentialwriteMBs, String randomseekreadwriteMBs,
-			String iposMBs) {
+	public pmHDD(double pmScore, double sequentialreadMBs, double sequentialwriteMBs, double randomseekreadwriteMBs,
+			double iposMBs) {
 		this.pmScore = pmScore;
 		this.sequentialreadMBs = sequentialreadMBs;
 		this.sequentialwriteMBs = sequentialwriteMBs;
@@ -810,23 +874,23 @@ class pmHDD {
 		this.iposMBs = iposMBs;
 	}
 
-	public String getPmScore() {
+	public double getPmScore() {
 		return pmScore;
 	}
 
-	public String getSequentialwriteMBs() {
+	public double getSequentialwriteMBs() {
 		return sequentialwriteMBs;
 	}
 
-	public String getRandomseekreadwriteMBs() {
+	public double getRandomseekreadwriteMBs() {
 		return randomseekreadwriteMBs;
 	}
 
-	public String getIposMBs() {
+	public double getIposMBs() {
 		return iposMBs;
 	}
 
-	public String getSequentialreadMBs() {
+	public double getSequentialreadMBs() {
 		return sequentialreadMBs;
 	}
 
@@ -846,7 +910,7 @@ class UserBenchmark {
 
 	}
 
-	public void createCPU(String score, String memory, String core, String core2, String core4, String core8) {
+	public void createCPU(double score, double memory, double core, double core2, double core4, double core8) {
 		this.cpu = new ubCPU(score, memory, core, core2, core4, core8);
 	}
 
@@ -854,7 +918,7 @@ class UserBenchmark {
 		return this.cpu;
 	}
 
-	public void createRAM(String score, String read, String write, String mixed, String latenz) {
+	public void createRAM(double score, double read, double write, double mixed, double latenz) {
 		this.ram = new ubRAM(score, read, write, mixed, latenz);
 	}
 
@@ -862,7 +926,7 @@ class UserBenchmark {
 		return this.ram;
 	}
 
-	public void createHDD(String score, String read, String write, String mixed) {
+	public void createHDD(double score, double read, double write, double mixed) {
 		this.hdd = new ubHDD(score, read, write, mixed);
 	}
 
@@ -873,14 +937,14 @@ class UserBenchmark {
 }
 
 class ubCPU {
-	private final String score;
-	private final String memory;
-	private final String core;
-	private final String core2;
-	private final String core4;
-	private final String core8;
+	private final double score;
+	private final double memory;
+	private final double core;
+	private final double core2;
+	private final double core4;
+	private final double core8;
 
-	public ubCPU(String score, String memory, String core, String core2, String core4, String core8) {
+	public ubCPU(double score, double memory, double core, double core2, double core4, double core8) {
 		this.score = score;
 		this.memory = memory;
 		this.core = core;
@@ -889,27 +953,27 @@ class ubCPU {
 		this.core8 = core8;
 	}
 
-	public String getScore() {
+	public double getScore() {
 		return score;
 	}
 
-	public String getMemory() {
+	public double getMemory() {
 		return memory;
 	}
 
-	public String getCore() {
+	public double getCore() {
 		return core;
 	}
 
-	public String getCore2() {
+	public double getCore2() {
 		return core2;
 	}
 
-	public String getCore4() {
+	public double getCore4() {
 		return core4;
 	}
 
-	public String getCore8() {
+	public double getCore8() {
 		return core8;
 	}
 
@@ -921,13 +985,13 @@ class ubCPU {
 }
 
 class ubRAM {
-	private String score;
-	private String read;
-	private String write;
-	private String mixed;
-	private String latenz;
+	private double score;
+	private double read;
+	private double write;
+	private double mixed;
+	private double latenz;
 
-	public ubRAM(String score, String read, String write, String mixed, String latenz) {
+	public ubRAM(double score, double read, double write, double mixed, double latenz) {
 		this.score = score;
 		this.read = read;
 		this.write = write;
@@ -935,23 +999,23 @@ class ubRAM {
 		this.latenz = latenz;
 	}
 
-	public String getScore() {
+	public double getScore() {
 		return score;
 	}
 
-	public String getRead() {
+	public double getRead() {
 		return read;
 	}
 
-	public String getWrite() {
+	public double getWrite() {
 		return write;
 	}
 
-	public String getMixed() {
+	public double getMixed() {
 		return mixed;
 	}
 
-	public String getLatenz() {
+	public double getLatenz() {
 		return latenz;
 	}
 
@@ -963,31 +1027,31 @@ class ubRAM {
 }
 
 class ubHDD {
-	private String score;
-	private String read;
-	private String write;
-	private String mixed;
+	private double score;
+	private double read;
+	private double write;
+	private double mixed;
 
-	public ubHDD(String score, String read, String write, String mixed) {
+	public ubHDD(double score, double read, double write, double mixed) {
 		this.score = score;
 		this.read = read;
 		this.write = write;
 		this.mixed = mixed;
 	}
 
-	public String getScore() {
+	public double getScore() {
 		return score;
 	}
 
-	public String getRead() {
+	public double getRead() {
 		return read;
 	}
 
-	public String getWrite() {
+	public double getWrite() {
 		return write;
 	}
 
-	public String getMixed() {
+	public double getMixed() {
 		return mixed;
 	}
 
