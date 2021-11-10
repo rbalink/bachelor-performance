@@ -2,7 +2,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -41,14 +43,16 @@ public class Performance {
 		performance.dummyCPU();
 		performance.scrapingDatabase();
 
-		System.out.println(performance.pd.toString());
-
-		performance.externalDatabase();
+		//System.out.println(performance.pd.toString());
+		performance.compare();
+		//performance.externalDatabase();
 	}
 
 	// dummy for testing
 	public void dummyCPU() {
 		log.info("Creating dummy CPU instance");
+		//Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz
+		//Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz
 		pd = new PerformanceData("Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz", "i5-4460", 2, 3.2, 2, "25", "150", "350",
 				"500");
 	}
@@ -163,13 +167,13 @@ public class Performance {
 
 		log.info("Connecting to external database");
 		try {
-			System.out.println("Loading the Driver");
+			log.info("Loading the driver");
 			Class.forName("org.postgresql.Driver");
-			System.out.println("Connecting to external PostgreSQL Server");
+			log.info("Connecting to external PostgreSQL server");
 			Connection con = DriverManager.getConnection(this.url, this.user, this.password);
-
+			log.info("Connecting to external PostgreSQL server");
 			System.out.println("Successful connection");
-
+			
 			Statement statement = con.createStatement();
 			statement.execute(
 					"INSERT INTO postgres (cpu_model_name, cpu_family, stepping, cpu_mhz,boinc_cpu_comp, boinc_cpu_core, pm_cpu_score, pm_cpu_intmath, pm_cpu_floatingpm, pm_cpu_prime, pm_cpu_randstso, pm_cpu_encrypt, pm_cpu_datacom, pm_cpu_phy, pm_cpu_exins, pm_cpu_thread, pm_ram_score, pm_ram_latenz, pm_ram_read, pm_ram_write, pm_hdd_score, pm_hdd_sread, pm_hdd_swrite, pm_hdd_rsrw, pm_hdd_ipos, ub_cpu_score, ub_cpu_memory, ub_cpu_core, ub_cpu_core2, ub_cpu_core4, ub_cpu_core8, ub_ram_score, ub_ram_read, ub_ram_write, ub_ram_mixed, ub_ram_latenz, ub_hdd_score, ub_hdd_read, ub_hdd_write, ub_hdd_mixed, gb_cpu_singlecore, gb_cpu_multicore)"
@@ -279,8 +283,8 @@ public class Performance {
 		if (com.equals(Component.CPU)) {
 			passmarkUrlList = "https://www.cpubenchmark.net/cpu_list.php";
 			passmarkUrlBeginning = "https://www.cpubenchmark.net/cpu.php";
-			name = "i5-4460 "; // i5-4460 //i5-7300U
-			name2 = "3.20"; // 3.20 // 2.60
+			name = shortCPUname(pd.getModelname()); //"i5-4460 "; // i5-4460 //i5-7300U
+			name2 = pd.getCpumhz() + "0"; //"3.20"; // 3.20 // 2.60
 			index = 1;
 		} else if (com.equals(Component.HDD)) {
 			passmarkUrlList = "https://www.harddrivebenchmark.net/hdd_list.php";
@@ -396,7 +400,7 @@ public class Performance {
 		log.info("found " + com.toString() + " - reading data");
 		String urlName = "";
 		if (com.equals(Component.CPU)) {
-			urlName = "i5-4460";
+			urlName = shortCPUname(pd.getModelname());//"i5-4460";
 		} else if (com.equals(Component.RAM)) {
 			urlName = "Kingston 99U5403-067.A00LF 4GB";
 		} else if (com.equals(Component.HDD)) {
@@ -471,8 +475,8 @@ public class Performance {
 	// TODO: Bug multiCoreValue
 	private void geekbenchDatabase() {
 		log.info("Reading data from geekbench db (CPU)");
-		String cpuNameKurz = "i5-4460";
-		String gHZ = "3.2";
+		String cpuNameKurz = shortCPUname(pd.getModelname());
+		String gHZ = Double.toString(pd.getCpumhz());
 
 		try {
 			final WebClient webClient = new WebClient();
@@ -485,8 +489,8 @@ public class Performance {
 			String multiCoreValue = geekbenchLoop((HtmlTable) domNode.get(1), cpuNameKurz, gHZ);
 			pd.setGbsingle(Double.parseDouble(singleCoreValue));
 			pd.setGbmulti(Double.parseDouble(multiCoreValue));
-			System.out.println("GeekbenchDB CPU: Single Core Value: " + singleCoreValue + " --- Multi Core Value: "
-					+ multiCoreValue);
+			//System.out.println("GeekbenchDB CPU: Single Core Value: " + singleCoreValue + " --- Multi Core Value: "
+			//		+ multiCoreValue);
 
 			webClient.close();
 		} catch (Exception e) {
@@ -521,6 +525,94 @@ public class Performance {
 			System.err.println("htmlunit SPEC Error");
 			e.printStackTrace();
 		}
+	}
+	
+	//comparing latest database entry with tested hardware
+	public void compare(){
+		log.info("Connecting to external database");
+		try {
+			Class.forName("org.postgresql.Driver");
+			Connection con = DriverManager.getConnection(this.url, this.user, this.password);
+			System.out.println("Successful connection");
+			
+			Statement statement = con.createStatement();
+			ResultSet rs1 = statement.executeQuery("SELECT count(*) from postgres;");
+			rs1.next();
+			String entries = rs1.getString(1);
+			
+//			Statement getStatement = con.createStatement();
+//			ResultSet rs2 = getStatement.executeQuery("select * from postgres where id = "+entries+";");
+//			while(rs2.next()){
+//				for(int i = 1 ; i<45;i++){
+//					//System.out.println(rs2.getString(i));
+//				}
+//				
+//			}
+			
+			ResultSet rs3 = statement.executeQuery("select pm_cpu_score from postgres where id = "+entries+";");
+			rs3.next();
+			double d = Double.parseDouble(rs3.getString(1));
+			double s = pd.getPm().getCPU().getPmScore() / d;
+			
+			//System.out.println("PMScore CPU Score "+s+"%");
+			double x = (s-1)*100;
+			System.out.println("Nach PMScore ist die CPU "+new DecimalFormat("#.##").format(x)+"% schneller");
+			
+			ResultSet rs4 = statement.executeQuery("select ub_cpu_score from postgres where id = "+entries+";");
+			rs4.next();
+			d = Double.parseDouble(rs4.getString(1));
+			s = pd.getUb().getCPU().getScore() / d;
+			
+			//System.out.println("UBscore CPU Score "+s+"%");
+			x = (s-1)*100;
+			System.out.println("Nach UB ist die CPU "+new DecimalFormat("#.##").format(x)+"% schneller");
+			
+			
+			ResultSet rs5 = statement.executeQuery("select gb_cpu_multicore from postgres where id = "+entries+";");
+			rs5.next();
+			d = Double.parseDouble(rs5.getString(1));
+			s = pd.getGbmulti() / d;
+			
+			//System.out.println("GBscore CPU Multi Score "+s+"%");
+			x = (s-1)*100;
+			System.out.println("Nach GB ist die CPU "+new DecimalFormat("#.##").format(x)+"% schneller");
+			
+			ResultSet rs6 = statement.executeQuery("select boinc_cpu_comp from postgres where id = "+entries+";");
+			rs6.next();
+			d = Double.parseDouble(rs6.getString(1));
+			s = pd.getGflopsComputer();
+			//s = pd.getGbmulti() / d;
+			
+			//System.out.println("GBscore CPU Multi Score "+s+"%");
+			//x = (s-1)*100;
+			System.out.println("Nach GFLOPS aktuell: "+new DecimalFormat("#.##").format(s)+", letzter Eintrag: "+new DecimalFormat("#.##").format(d));
+			
+			
+			ResultSet rs7 = statement.executeQuery("select pm_cpu_floatingpm, pm_cpu_datacom from postgres where id = "+entries+";");
+			rs7.next();
+			d = Double.parseDouble(rs7.getString(1));
+			double e = Double.parseDouble(rs7.getString(2));
+			double t = pd.getPm().getCPU().getFloatingPointMath();
+			
+			s = pd.getPm().getCPU().getDataCompression();
+			System.out.println();
+			double eigen = (((0.66 * (t/d)) + (0.33 * (s/e)))-1)*100;
+			
+			System.out.println("Nach eigener Berechnung: "+new DecimalFormat("#.##").format(eigen)+"% schneller");
+			
+			
+			
+		}catch(Exception e){
+			System.err.println("PostgresQL Error");
+			e.printStackTrace();
+		}
+	}
+	
+	private static String shortCPUname(String cpu){
+		if(cpu.contains("Intel")){
+			return cpu.split(" ")[2];
+		}
+		return "";
 	}
 
 }
