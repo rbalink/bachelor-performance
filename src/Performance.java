@@ -38,9 +38,9 @@ public class Performance {
 
 	public static void main(String[] args) {
 		Performance performance = new Performance();
-		// performance.getHardwareInformation();
+		performance.getHardwareInformation();
 
-		performance.dummyCPU();
+		// performance.dummyCPU();
 		performance.scrapingDatabase();
 
 		// System.out.println(performance.pd.toString());
@@ -82,7 +82,7 @@ public class Performance {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void checkGCP() {
 		log.info("Checking if GCP");
 		try {
@@ -90,15 +90,22 @@ public class Performance {
 			String text;
 
 			// list cpu info
-			builder.command("bash", "-c", "wget -q -O - --header Metadata-Flavor:Google metadata/computeMetadata/v1/instance/machine-type");
+			builder.command("bash", "-c",
+					"wget -q -O - --header Metadata-Flavor:Google metadata/computeMetadata/v1/instance/machine-type");
 
 			// read from terminal
 			Process process = builder.start();
 			BufferedReader read = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
 			while ((text = read.readLine()) != null) {
-				System.out.println(text);
+				if (text.contains("machineTypes")) {
+					pd.setGcpVersion(text.split("\\")[3]);
+					pd.setGCP(true);
+				} else {
+					pd.setGCP(false);
+				}
 			}
+			
 
 			process.destroy();
 
@@ -176,9 +183,9 @@ public class Performance {
 			Process process = builder.start();
 			BufferedReader read = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
+			String version;
 			while ((text = read.readLine()) != null) {
-				System.out.println(text);
-				// TODO:
+				//TODO
 			}
 
 			process.destroy();
@@ -240,14 +247,44 @@ public class Performance {
 	public void scrapingDatabase() {
 		java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
 
-		boincDatabase();
-		passmarkDatabase();
-		userbenchmarkDatabase();
-		geekbenchDatabase();
-		// specBenchmark();
+		if (pd.isGCP()) {
+			pcrDatabase();
+		} else {
+			boincDatabase();
+			passmarkDatabase();
+			userbenchmarkDatabase();
+			geekbenchDatabase();
+		}
 
-		// todo openbenchmarking
+	}
 
+	private void pcrDatabase() {
+		log.info("Connecting Public Cloud Reference (GCP VM)");
+
+		try {
+			final WebClient webClient = new WebClient();
+			webClient.getOptions().setCssEnabled(false);
+			webClient.getOptions().setJavaScriptEnabled(false);
+			final HtmlPage page = webClient.getPage("https://boinc.bakerlab.org/rosetta/cpu_list.php");
+			DomNodeList<DomElement> versuch = page.getElementsByTagName("table");
+			HtmlTable table = (HtmlTable) versuch.get(0);
+
+			for (int i = 0; i < table.getRowCount(); i++) {
+				String cpuName = table.getRow(i).getCell(0).asNormalizedText();
+				if (cpuName.contains(StringUtils.normalizeSpace(pd.getModelname()))) {
+					String gflopsCore = table.getRow(i).getCell(3).asNormalizedText();
+					String gflopsComputer = table.getRow(i).getCell(4).asNormalizedText();
+					this.pd.setGflopsCore(Float.parseFloat(gflopsCore));
+
+					this.pd.setGflopsComputer(Float.parseFloat(gflopsComputer));
+					break;
+				}
+			}
+			webClient.close();
+		} catch (Exception e) {
+			System.err.println("htmlunit PCR Error");
+			e.printStackTrace();
+		}
 	}
 
 	// Boinc Bakerlab Rosetta GFLOPS
@@ -690,6 +727,7 @@ public class Performance {
 
 class PerformanceData {
 	private boolean isGCP;
+	private String gcpVersion;
 	private String modelname;
 	private String model;
 	private int stepping;
@@ -729,6 +767,14 @@ class PerformanceData {
 
 	public void setGCP(boolean isGCP) {
 		this.isGCP = isGCP;
+	}
+
+	public String getGcpVersion() {
+		return gcpVersion;
+	}
+
+	public void setGcpVersion(String gcpVersion) {
+		this.gcpVersion = gcpVersion;
 	}
 
 	public PassMarkBenchmark getPm() {
