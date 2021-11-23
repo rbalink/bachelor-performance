@@ -38,9 +38,9 @@ public class Performance {
 
 	public static void main(String[] args) {
 		Performance performance = new Performance();
-		performance.getHardwareInformation();
+		// performance.getHardwareInformation();
 
-		// performance.dummyCPU();
+		performance.dummyCPU();
 		performance.scrapingDatabase();
 
 		// System.out.println(performance.pd.toString());
@@ -48,15 +48,25 @@ public class Performance {
 		// performance.externalDatabase();
 	}
 
-	// dummy for testing
+	/**
+	 * Dummy method for testing with windows machine.
+	 * 
+	 * CPU examples: "Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz", "Intel(R)
+	 * Core(TM) i7-4790 CPU @ 3.60GHz".
+	 * 
+	 */
 	public void dummyCPU() {
 		log.info("Creating dummy CPU instance");
-		// Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz
-		// Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz
+
 		pd = new PerformanceData("Intel(R) Core(TM) i5-4460 CPU @ 3.20GHz", "i5-4460", 2, 3.2, 2, "25", "150", "350",
 				"500");
+		pd.setGCP(true);
+		pd.setGcpVersion("n2-standard-4");
 	}
 
+	/**
+	 * Method to get hardware information from terminal with bash
+	 */
 	public void getHardwareInformation() {
 		log.info("Reading Hardware Data from Computer");
 		try {
@@ -73,7 +83,7 @@ public class Performance {
 					Integer.parseInt(lscpu.get("Prozessorfamilie")), "Test", "", "", "");
 
 			// TODO:
-			// readerRAM();
+			readerRAM();
 			// readerDisk();
 			System.out.println("break");
 
@@ -83,17 +93,22 @@ public class Performance {
 		}
 	}
 
+	/**
+	 * Method to check if computer is an instance of a google cloud virtual
+	 * machine.
+	 * 
+	 * Example of output: projects/975512118415/machineTypes/n2-standard-4
+	 * 
+	 */
 	public void checkGCP() {
 		log.info("Checking if GCP");
 		try {
 			ProcessBuilder builder = new ProcessBuilder();
 			String text;
 
-			// list cpu info
 			builder.command("bash", "-c",
 					"wget -q -O - --header Metadata-Flavor:Google metadata/computeMetadata/v1/instance/machine-type");
 
-			// read from terminal
 			Process process = builder.start();
 			BufferedReader read = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
@@ -105,7 +120,6 @@ public class Performance {
 					pd.setGCP(false);
 				}
 			}
-			
 
 			process.destroy();
 
@@ -115,6 +129,9 @@ public class Performance {
 		}
 	}
 
+	/**
+	 * Method to get cpu information from terminal with bash
+	 */
 	public void readerCPU() {
 		log.info("Reading CPU data");
 		try {
@@ -142,17 +159,17 @@ public class Performance {
 		}
 	}
 
-	// TODO: check with MacOS
+	/**
+	 * Method to get ram information from terminal with bash
+	 */
 	public void readerRAM() {
 		log.info("Reading RAM data");
 		try {
 			ProcessBuilder builder = new ProcessBuilder();
 			String text;
 
-			// list ram info
 			builder.command("bash", "-c", "sudo lshw -c memory");
 
-			// read from terminal
 			Process process = builder.start();
 			BufferedReader read = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
@@ -169,23 +186,22 @@ public class Performance {
 		}
 	}
 
-	// TODO: Disk
+	/**
+	 * Method to get disk information from terminal with bash
+	 */
 	public void readerDisk() {
 		log.info("Reading Disk data");
 		try {
 			ProcessBuilder builder = new ProcessBuilder();
-			String text;
+			String text = "";
 
-			// list ram info
 			builder.command("bash", "-c", "sudo lshw -c memory");
 
-			// read from terminal
 			Process process = builder.start();
 			BufferedReader read = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-			String version;
 			while ((text = read.readLine()) != null) {
-				//TODO
+				// TODO
 			}
 
 			process.destroy();
@@ -196,8 +212,11 @@ public class Performance {
 		}
 	}
 
+	/**
+	 * Connecting to external database and inserting extracted values
+	 * 
+	 */
 	public void externalDatabase() {
-
 		log.info("Connecting to external database");
 		try {
 			log.info("Loading the driver");
@@ -208,35 +227,39 @@ public class Performance {
 			System.out.println("Successful connection");
 
 			Statement statement = con.createStatement();
-			statement.execute(
-					"INSERT INTO postgres (cpu_model_name, cpu_family, stepping, cpu_mhz,boinc_cpu_comp, boinc_cpu_core, pm_cpu_score, pm_cpu_intmath, pm_cpu_floatingpm, pm_cpu_prime, pm_cpu_randstso, pm_cpu_encrypt, pm_cpu_datacom, pm_cpu_phy, pm_cpu_exins, pm_cpu_thread, pm_ram_score, pm_ram_latenz, pm_ram_read, pm_ram_write, pm_hdd_score, pm_hdd_sread, pm_hdd_swrite, pm_hdd_rsrw, pm_hdd_ipos, ub_cpu_score, ub_cpu_memory, ub_cpu_core, ub_cpu_core2, ub_cpu_core4, ub_cpu_core8, ub_ram_score, ub_ram_read, ub_ram_write, ub_ram_mixed, ub_ram_latenz, ub_hdd_score, ub_hdd_read, ub_hdd_write, ub_hdd_mixed, gb_cpu_singlecore, gb_cpu_multicore)"
-							+ "VALUES ('" + this.pd.getModelname() + "'," + this.pd.getCpufamily() + ","
-							+ this.pd.getStepping() + "," + this.pd.getCpumhz() + "," + this.pd.getGflopsComputer()
-							+ "," + this.pd.getGflopsCore() + "," + this.pd.getPm().getCPU().getPmScore() + ","
-							+ this.pd.getPm().getCPU().getIntegerMath() + ","
-							+ this.pd.getPm().getCPU().getFloatingPointMath() + ","
-							+ this.pd.getPm().getCPU().getfindPrimeNumbers() + ","
-							+ this.pd.getPm().getCPU().getRandomStringSorting() + ","
-							+ this.pd.getPm().getCPU().getDataEncryption() + ","
-							+ this.pd.getPm().getCPU().getDataCompression() + ","
-							+ this.pd.getPm().getCPU().getPhysics() + ","
-							+ this.pd.getPm().getCPU().getExtendedInstructions() + ","
-							+ this.pd.getPm().getCPU().getSingleThread() + "," + this.pd.getPm().getRAM().getPmScore()
-							+ "," + this.pd.getPm().getRAM().getLatency() + "," + this.pd.getPm().getRAM().getReadGBs()
-							+ "," + this.pd.getPm().getRAM().getWriteGBs() + "," + this.pd.getPm().getHDD().getPmScore()
-							+ "," + this.pd.getPm().getHDD().getSequentialreadMBs() + ","
-							+ this.pd.getPm().getHDD().getSequentialwriteMBs() + ","
-							+ this.pd.getPm().getHDD().getRandomseekreadwriteMBs() + ","
-							+ this.pd.getPm().getHDD().getIposMBs() + "," + this.pd.getUb().getCPU().getScore() + ","
-							+ this.pd.getUb().getCPU().getMemory() + "," + this.pd.getUb().getCPU().getCore() + ","
-							+ this.pd.getUb().getCPU().getCore2() + "," + this.pd.getUb().getCPU().getCore4() + ","
-							+ this.pd.getUb().getCPU().getCore8() + "," + this.pd.getUb().getRAM().getScore() + ","
-							+ this.pd.getUb().getRAM().getRead() + "," + this.pd.getUb().getRAM().getWrite() + ","
-							+ this.pd.getUb().getRAM().getMixed() + "," + this.pd.getUb().getRAM().getLatenz() + ","
-							+ this.pd.getUb().getHDD().getScore() + "," + this.pd.getUb().getHDD().getRead() + ","
-							+ this.pd.getUb().getHDD().getWrite() + "," + this.pd.getUb().getHDD().getMixed() + ","
-							+ this.pd.getGbsingle() + "," + this.pd.getGbmulti() + ");");
-
+			if (pd.isGCP()) {
+				// TODO INSERT for GCP
+			} else {
+				statement.execute(
+						"INSERT INTO postgres (cpu_model_name, cpu_family, stepping, cpu_mhz,boinc_cpu_comp, boinc_cpu_core, pm_cpu_score, pm_cpu_intmath, pm_cpu_floatingpm, pm_cpu_prime, pm_cpu_randstso, pm_cpu_encrypt, pm_cpu_datacom, pm_cpu_phy, pm_cpu_exins, pm_cpu_thread, pm_ram_score, pm_ram_latenz, pm_ram_read, pm_ram_write, pm_hdd_score, pm_hdd_sread, pm_hdd_swrite, pm_hdd_rsrw, pm_hdd_ipos, ub_cpu_score, ub_cpu_memory, ub_cpu_core, ub_cpu_core2, ub_cpu_core4, ub_cpu_core8, ub_ram_score, ub_ram_read, ub_ram_write, ub_ram_mixed, ub_ram_latenz, ub_hdd_score, ub_hdd_read, ub_hdd_write, ub_hdd_mixed, gb_cpu_singlecore, gb_cpu_multicore)"
+								+ "VALUES ('" + this.pd.getModelname() + "'," + this.pd.getCpufamily() + ","
+								+ this.pd.getStepping() + "," + this.pd.getCpumhz() + "," + this.pd.getGflopsComputer()
+								+ "," + this.pd.getGflopsCore() + "," + this.pd.getPm().getCPU().getPmScore() + ","
+								+ this.pd.getPm().getCPU().getIntegerMath() + ","
+								+ this.pd.getPm().getCPU().getFloatingPointMath() + ","
+								+ this.pd.getPm().getCPU().getfindPrimeNumbers() + ","
+								+ this.pd.getPm().getCPU().getRandomStringSorting() + ","
+								+ this.pd.getPm().getCPU().getDataEncryption() + ","
+								+ this.pd.getPm().getCPU().getDataCompression() + ","
+								+ this.pd.getPm().getCPU().getPhysics() + ","
+								+ this.pd.getPm().getCPU().getExtendedInstructions() + ","
+								+ this.pd.getPm().getCPU().getSingleThread() + ","
+								+ this.pd.getPm().getRAM().getPmScore() + "," + this.pd.getPm().getRAM().getLatency()
+								+ "," + this.pd.getPm().getRAM().getReadGBs() + ","
+								+ this.pd.getPm().getRAM().getWriteGBs() + "," + this.pd.getPm().getHDD().getPmScore()
+								+ "," + this.pd.getPm().getHDD().getSequentialreadMBs() + ","
+								+ this.pd.getPm().getHDD().getSequentialwriteMBs() + ","
+								+ this.pd.getPm().getHDD().getRandomseekreadwriteMBs() + ","
+								+ this.pd.getPm().getHDD().getIposMBs() + "," + this.pd.getUb().getCPU().getScore()
+								+ "," + this.pd.getUb().getCPU().getMemory() + "," + this.pd.getUb().getCPU().getCore()
+								+ "," + this.pd.getUb().getCPU().getCore2() + "," + this.pd.getUb().getCPU().getCore4()
+								+ "," + this.pd.getUb().getCPU().getCore8() + "," + this.pd.getUb().getRAM().getScore()
+								+ "," + this.pd.getUb().getRAM().getRead() + "," + this.pd.getUb().getRAM().getWrite()
+								+ "," + this.pd.getUb().getRAM().getMixed() + "," + this.pd.getUb().getRAM().getLatenz()
+								+ "," + this.pd.getUb().getHDD().getScore() + "," + this.pd.getUb().getHDD().getRead()
+								+ "," + this.pd.getUb().getHDD().getWrite() + "," + this.pd.getUb().getHDD().getMixed()
+								+ "," + this.pd.getGbsingle() + "," + this.pd.getGbmulti() + ");");
+			}
 			System.out.println("Inserting successful");
 		} catch (Exception e) {
 			System.err.println("PostgresQL Error");
@@ -244,6 +267,9 @@ public class Performance {
 		}
 	}
 
+	/**
+	 * Central method which calls all databases to scrape from
+	 */
 	public void scrapingDatabase() {
 		java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
 
@@ -258,6 +284,11 @@ public class Performance {
 
 	}
 
+	/**
+	 * Scraping Public Cloud Reference Database for VM Instances from Google
+	 * Cloud Platform. Method checks all possible Google Cloud Instances for
+	 * Candidate
+	 */
 	private void pcrDatabase() {
 		log.info("Connecting Public Cloud Reference (GCP VM)");
 
@@ -265,18 +296,14 @@ public class Performance {
 			final WebClient webClient = new WebClient();
 			webClient.getOptions().setCssEnabled(false);
 			webClient.getOptions().setJavaScriptEnabled(false);
-			final HtmlPage page = webClient.getPage("https://boinc.bakerlab.org/rosetta/cpu_list.php");
+			final HtmlPage page = webClient.getPage("https://pcr.cloud-mercato.com/providers/flavors?provider=google");
 			DomNodeList<DomElement> versuch = page.getElementsByTagName("table");
 			HtmlTable table = (HtmlTable) versuch.get(0);
-
 			for (int i = 0; i < table.getRowCount(); i++) {
-				String cpuName = table.getRow(i).getCell(0).asNormalizedText();
-				if (cpuName.contains(StringUtils.normalizeSpace(pd.getModelname()))) {
-					String gflopsCore = table.getRow(i).getCell(3).asNormalizedText();
-					String gflopsComputer = table.getRow(i).getCell(4).asNormalizedText();
-					this.pd.setGflopsCore(Float.parseFloat(gflopsCore));
-
-					this.pd.setGflopsComputer(Float.parseFloat(gflopsComputer));
+				String flavors = table.getRow(i).getCell(0).asNormalizedText();
+				if (flavors.contains(pd.getGcpVersion())) {
+					HtmlAnchor html = (HtmlAnchor) table.getRow(i).getCell(0).getFirstChild();
+					pcrPerformance(html.getHrefAttribute());
 					break;
 				}
 			}
@@ -287,8 +314,55 @@ public class Performance {
 		}
 	}
 
-	// Boinc Bakerlab Rosetta GFLOPS
-	// TODO: bei mehreren Eintraegen
+	/**
+	 * Redirects to scrape all relevant performance data (cpu single/multi, ipos
+	 * read/write, storage read/write) of the candidate
+	 * 
+	 * @param html
+	 *            link of the candidate
+	 */
+	private void pcrPerformance(String html) {
+		try {
+			final WebClient webClient = new WebClient();
+			webClient.getOptions().setCssEnabled(false);
+			webClient.getOptions().setJavaScriptEnabled(false);
+			final HtmlPage pageGeekbench = webClient
+					.getPage("https://pcr.cloud-mercato.com" + html + "/performance/geekbench5");
+
+			DomNodeList<DomElement> node = pageGeekbench.getElementsByTagName("table");
+			HtmlTable table = (HtmlTable) node.get(0);
+			// Single + Multi
+			pd.getPcr().setCPUsingle(Integer.parseInt(table.getRow(2).getCell(1).asNormalizedText()));
+			pd.getPcr().setCPUmulti(Integer.parseInt(table.getRow(2).getCell(2).asNormalizedText()));
+
+			final HtmlPage pageIOPS = webClient.getPage("https://pcr.cloud-mercato.com" + html + "/performance/iops");
+
+			DomNodeList<DomElement> node2 = pageIOPS.getElementsByTagName("table");
+			HtmlTable table2 = (HtmlTable) node2.get(1);
+			// Read + Write
+			pd.getPcr().setIPOSread(Integer.parseInt(table2.getRow(2).getCell(1).asNormalizedText()));
+			pd.getPcr().setIPOSwrite(Integer.parseInt(table2.getRow(2).getCell(2).asNormalizedText()));
+
+			final HtmlPage pageStorage = webClient
+					.getPage("https://pcr.cloud-mercato.com" + html + "/performance/storage-bandwidth");
+
+			DomNodeList<DomElement> node3 = pageStorage.getElementsByTagName("table");
+			HtmlTable table3 = (HtmlTable) node3.get(1);
+			// Read + Write
+			pd.getPcr().setStorageRead(Integer.parseInt(table3.getRow(2).getCell(1).asNormalizedText()));
+			pd.getPcr().setStorageWrite(Integer.parseInt(table3.getRow(2).getCell(2).asNormalizedText()));
+
+			webClient.close();
+
+		} catch (Exception e) {
+			System.err.println("htmlunit PCR Error");
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Scraping Rosetta@home for GFLOPS values (per Core and per Computer)
+	 */
 	private void boincDatabase() {
 		log.info("Connecting boinc batabase (CPU)");
 
@@ -318,12 +392,11 @@ public class Performance {
 		}
 	}
 
-	// passmark Software (cpubenchmark)
-	// passMark PerformanceTestv10 Score
-	// TODO: Add Format CPU Name Kurz !
-	// TODO: Add to Schema
 	// TODO: Check ob der Name eindeutig ist !
-	// TODO: Information: F�r CPU gibt es auch Multi CPU Systems
+	// TODO: Information: CPU gibt es auch Multi CPU Systems
+	/**
+	 * Scraping PassMark Database for CPU, RAM and Disk
+	 */
 	private void passmarkDatabase() {
 		log.info("Connecting passmark database (CPU, HDD, RAM)");
 		pd.setPassMarkBenchmark(new PassMarkBenchmark());
@@ -333,6 +406,13 @@ public class Performance {
 		log.info("passmark done");
 	}
 
+	/**
+	 * Method for finding CPU, Disk or RAM from PassMark Table which contains
+	 * all possible CPU, RAM or Disk
+	 * 
+	 * @param com
+	 *            Component
+	 */
 	private void passmarkTableScraping(Component com) {
 		log.info("passmark db: " + com.toString());
 
@@ -405,6 +485,14 @@ public class Performance {
 		}
 	}
 
+	/**
+	 * Redirecting to PassMark page with the actual component
+	 * 
+	 * @param url
+	 *            URL of the component
+	 * @param com
+	 *            Component
+	 */
 	private void passmarkRedirecting(String url, Component com) {
 		log.info("found " + com.toString() + " - reading data");
 		String passmarkBench;
@@ -458,7 +546,9 @@ public class Performance {
 		}
 	}
 
-	// userbenchmark
+	/**
+	 * Main method for scraping UserBenchmark
+	 */
 	private void userbenchmarkDatabase() {
 		log.info("Reading data from userbenchmark db");
 		userbenchmarkRedirect(Component.CPU);
@@ -467,6 +557,12 @@ public class Performance {
 		log.info("userbenchmark done");
 	}
 
+	/**
+	 * Method for finding specific component (CPU,RAM or Disk)
+	 * 
+	 * @param com
+	 *            Component
+	 */
 	private void userbenchmarkRedirect(Component com) {
 		log.info("found " + com.toString() + " - reading data");
 		String urlName = "";
@@ -545,7 +641,9 @@ public class Performance {
 
 	}
 
-	// TODO: Bug multiCoreValue
+	/**
+	 * Scraping GeekBench5 Database
+	 */
 	private void geekbenchDatabase() {
 		log.info("Reading data from geekbench db (CPU)");
 		String cpuNameKurz = shortCPUname(pd.getModelname());
@@ -573,6 +671,14 @@ public class Performance {
 		}
 	}
 
+	/**
+	 * Help method for finding geekbench values
+	 * 
+	 * @param table
+	 * @param cpuNameKurz
+	 * @param gHz
+	 * @return
+	 */
 	private String geekbenchLoop(HtmlTable table, String cpuNameKurz, String gHz) {
 		for (int i = 0; i < table.getRowCount(); i++) {
 			if (table.getRow(i).getCell(0).asNormalizedText().contains(cpuNameKurz)
@@ -583,25 +689,10 @@ public class Performance {
 		return "";
 	}
 
-	private void specBenchmark() {
-		log.info("spec Benchmark");
-		String cpuNameKurz = "i5-4460";
-
-		try {
-			final WebClient webClient = new WebClient();
-			webClient.getOptions().setCssEnabled(false);
-			webClient.getOptions().setJavaScriptEnabled(false);
-			webClient.getOptions().setThrowExceptionOnScriptError(false);
-			final HtmlPage result = webClient.getPage("https://browser.geekbench.com/processor-benchmarks");
-
-			webClient.close();
-		} catch (Exception e) {
-			System.err.println("htmlunit SPEC Error");
-			e.printStackTrace();
-		}
-	}
-
-	// comparing latest database entry with tested hardware
+	/**
+	 * Method for comparing results from last entry of external database and
+	 * this hardware.
+	 */
 	public void compare() {
 		log.info("Connecting to external database");
 		try {
@@ -614,22 +705,11 @@ public class Performance {
 			rs1.next();
 			String entries = rs1.getString(1);
 
-			// Statement getStatement = con.createStatement();
-			// ResultSet rs2 = getStatement.executeQuery("select * from postgres
-			// where id = "+entries+";");
-			// while(rs2.next()){
-			// for(int i = 1 ; i<45;i++){
-			// //System.out.println(rs2.getString(i));
-			// }
-			//
-			// }
-
 			ResultSet rs3 = statement.executeQuery("select pm_cpu_score from postgres where id = " + entries + ";");
 			rs3.next();
 			double d = Double.parseDouble(rs3.getString(1));
 			double s = pd.getPm().getCPU().getPmScore() / d;
 
-			// System.out.println("PMScore CPU Score "+s+"%");
 			double x = (s - 1) * 100;
 			System.out.println("Nach PMScore ist die CPU " + new DecimalFormat("#.##").format(x) + "% schneller");
 
@@ -638,7 +718,6 @@ public class Performance {
 			d = Double.parseDouble(rs4.getString(1));
 			s = pd.getUb().getCPU().getScore() / d;
 
-			// System.out.println("UBscore CPU Score "+s+"%");
 			x = (s - 1) * 100;
 			System.out.println("Nach UB ist die CPU " + new DecimalFormat("#.##").format(x) + "% schneller");
 
@@ -647,7 +726,6 @@ public class Performance {
 			d = Double.parseDouble(rs5.getString(1));
 			s = pd.getGbmulti() / d;
 
-			// System.out.println("GBscore CPU Multi Score "+s+"%");
 			x = (s - 1) * 100;
 			System.out.println("Nach GB ist die CPU " + new DecimalFormat("#.##").format(x) + "% schneller");
 
@@ -655,10 +733,7 @@ public class Performance {
 			rs6.next();
 			d = Double.parseDouble(rs6.getString(1));
 			s = pd.getGflopsComputer();
-			// s = pd.getGbmulti() / d;
 
-			// System.out.println("GBscore CPU Multi Score "+s+"%");
-			// x = (s-1)*100;
 			System.out.println("Nach GFLOPS aktuell: " + new DecimalFormat("#.##").format(s) + ", letzter Eintrag: "
 					+ new DecimalFormat("#.##").format(d));
 
@@ -716,6 +791,12 @@ public class Performance {
 		}
 	}
 
+	/**
+	 * Help method for short CPU name variant
+	 * 
+	 * @param cpu
+	 * @return
+	 */
 	private static String shortCPUname(String cpu) {
 		if (cpu.contains("Intel")) {
 			return cpu.split(" ")[2];
@@ -725,6 +806,13 @@ public class Performance {
 
 }
 
+/**
+ * Class which contains all information about the hardware and the performance
+ * values
+ * 
+ * @author Robert
+ *
+ */
 class PerformanceData {
 	private boolean isGCP;
 	private String gcpVersion;
@@ -745,6 +833,7 @@ class PerformanceData {
 	private UserBenchmark ub;
 	private double gbsingle;
 	private double gbmulti;
+	private PCR pcr;
 
 	public PerformanceData(String modelname, String model, int stepping, double cpumhz, int cpufamily, String l1dcache,
 			String l1icache, String l2cache, String l3cache) {
@@ -759,6 +848,7 @@ class PerformanceData {
 		this.l3cache = l3cache;
 		this.pm = new PassMarkBenchmark();
 		this.ub = new UserBenchmark();
+		this.pcr = new PCR();
 	}
 
 	public boolean isGCP() {
@@ -783,6 +873,14 @@ class PerformanceData {
 
 	public void setPassMarkBenchmark(PassMarkBenchmark pm) {
 		this.pm = pm;
+	}
+
+	public PCR getPcr() {
+		return pcr;
+	}
+
+	public void setPcr(PCR pcr) {
+		this.pcr = pcr;
 	}
 
 	public UserBenchmark getUb() {
@@ -922,6 +1020,13 @@ class PerformanceData {
 
 }
 
+/**
+ * Class which contains all the performance data of the PassMark database
+ * (CPU,RAM,Disk)
+ * 
+ * @author Robert
+ *
+ */
 class PassMarkBenchmark {
 	public pmCPU cpu;
 	public pmRAM ram;
@@ -961,6 +1066,12 @@ class PassMarkBenchmark {
 
 }
 
+/**
+ * Class for cpu performance values of PassMark Database
+ * 
+ * @author Robert
+ *
+ */
 class pmCPU {
 	private final double pmScore;
 	private final double integerMath;
@@ -1037,6 +1148,12 @@ class pmCPU {
 	}
 }
 
+/**
+ * Class for ram performance values of PassMark Database
+ * 
+ * @author Robert
+ *
+ */
 class pmRAM {
 	private double pmScore;
 	private final double latency;
@@ -1076,6 +1193,12 @@ class pmRAM {
 	}
 }
 
+/**
+ * Class for hard disk performance values of PassMark Database
+ * 
+ * @author Robert
+ *
+ */
 class pmHDD {
 	private final double pmScore;
 	private final double sequentialreadMBs;
@@ -1119,6 +1242,12 @@ class pmHDD {
 	}
 }
 
+/**
+ * Class of UserBenchmark which holds cpu, ram and hard disk performance values
+ * 
+ * @author Robert
+ *
+ */
 class UserBenchmark {
 	public ubCPU cpu;
 	public ubRAM ram;
@@ -1154,6 +1283,12 @@ class UserBenchmark {
 
 }
 
+/**
+ * Class for cpu performance values of UserBenchmark Database
+ * 
+ * @author Robert
+ *
+ */
 class ubCPU {
 	private final double score;
 	private final double memory;
@@ -1202,6 +1337,12 @@ class ubCPU {
 
 }
 
+/**
+ * Class for ram performance values of UserBenchmark Database
+ * 
+ * @author Robert
+ *
+ */
 class ubRAM {
 	private double score;
 	private double read;
@@ -1244,6 +1385,12 @@ class ubRAM {
 
 }
 
+/**
+ * Class for hard disk performance values of UserBenchmark Database
+ * 
+ * @author Robert
+ *
+ */
 class ubHDD {
 	private double score;
 	private double read;
@@ -1276,6 +1423,79 @@ class ubHDD {
 	public String toString() {
 		return "Userbenchmark HDD/SSD: Score: " + this.score + "% --- Read MB/s: " + this.read + " --- Write MB/s: "
 				+ this.write + " --- Mixed MB/s: " + this.mixed;
+	}
+
+}
+
+/**
+ * Class for performance values of PublicCloudReference Database (GCP VM)
+ * 
+ * @author Robert
+ *
+ */
+class PCR {
+	private int CPUsingle;
+	private int CPUmulti;
+	private int IPOSread;
+	private int IPOSwrite;
+	private int StorageRead;
+	private int StorageWrite;
+
+	public PCR() {
+	}
+
+	public int getCPUsingle() {
+		return CPUsingle;
+	}
+
+	public void setCPUsingle(int cPUsingle) {
+		CPUsingle = cPUsingle;
+	}
+
+	public int getCPUmulti() {
+		return CPUmulti;
+	}
+
+	public void setCPUmulti(int cPUmulti) {
+		CPUmulti = cPUmulti;
+	}
+
+	public int getIPOSread() {
+		return IPOSread;
+	}
+
+	public void setIPOSread(int iPOSread) {
+		IPOSread = iPOSread;
+	}
+
+	public int getIPOSwrite() {
+		return IPOSwrite;
+	}
+
+	public void setIPOSwrite(int iPOSwrite) {
+		IPOSwrite = iPOSwrite;
+	}
+
+	public int getStorageRead() {
+		return StorageRead;
+	}
+
+	public void setStorageRead(int storageRead) {
+		StorageRead = storageRead;
+	}
+
+	public int getStorageWrite() {
+		return StorageWrite;
+	}
+
+	public void setStorageWrite(int storageWrite) {
+		StorageWrite = storageWrite;
+	}
+
+	public String toString() {
+		return "Public Cloud Reference: CPU Single: " + this.CPUsingle + " ---CPU Multi: " + this.CPUmulti
+				+ " --- IPOS read: " + this.IPOSread + " --- IPOS write: " + this.IPOSwrite + " --- Storage read: "
+				+ this.StorageRead + " --- Storage write: " + this.StorageWrite;
 	}
 
 }
