@@ -65,6 +65,7 @@ public class Performance {
 				throw new Exception();
 			}
 
+			checkGCP();
 			readerCPU();
 
 			pd = new PerformanceData(lscpu.get("Modellname"), lscpu.get("Modell"),
@@ -78,6 +79,31 @@ public class Performance {
 
 		} catch (Exception e) {
 			System.err.println("Hardware Information Problems");
+			e.printStackTrace();
+		}
+	}
+	
+	public void checkGCP() {
+		log.info("Checking if GCP");
+		try {
+			ProcessBuilder builder = new ProcessBuilder();
+			String text;
+
+			// list cpu info
+			builder.command("bash", "-c", "wget -q -O - --header Metadata-Flavor:Google metadata/computeMetadata/v1/instance/machine-type");
+
+			// read from terminal
+			Process process = builder.start();
+			BufferedReader read = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+			while ((text = read.readLine()) != null) {
+				System.out.println(text);
+			}
+
+			process.destroy();
+
+		} catch (Exception e) {
+			System.err.println("Couldn't read from Terminal - wget");
 			e.printStackTrace();
 		}
 	}
@@ -663,6 +689,7 @@ public class Performance {
 }
 
 class PerformanceData {
+	private boolean isGCP;
 	private String modelname;
 	private String model;
 	private int stepping;
@@ -694,6 +721,14 @@ class PerformanceData {
 		this.l3cache = l3cache;
 		this.pm = new PassMarkBenchmark();
 		this.ub = new UserBenchmark();
+	}
+
+	public boolean isGCP() {
+		return isGCP;
+	}
+
+	public void setGCP(boolean isGCP) {
+		this.isGCP = isGCP;
 	}
 
 	public PassMarkBenchmark getPm() {
