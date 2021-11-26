@@ -1,0 +1,52 @@
+----------------------------------------------------
+                                        ,--./,-.
+        ___     __   __   __   ___     /,-._.--~\
+  |\ | |__  __ /  ` /  \ |__) |__         }  {
+  | \| |       \__, \__/ |  \ |___     \`-._,-`-,
+                                        `._,._,'
+  nf-core/eager v2.4.0
+----------------------------------------------------
+
+Run Name: lonely_marconi
+
+## nf-core/eager execution completed successfully! ##
+
+
+The workflow was completed at 2021-11-26T04:40:36.542389+01:00 (duration: 3h 15m 13s)
+
+The command used to launch the workflow was as follows:
+
+  nextflow run eager -profile test_full,docker
+
+
+
+Pipeline Configuration:
+-----------------------
+ - Pipeline Release: master
+ - Run Name: lonely_marconi
+ - Input: https://raw.githubusercontent.com/tuberinfo/eager/master/test_own.tsv
+ - Fasta Ref: https://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_other/Gadus_morhua/representative/GCF_902167405.1_gadMor3.0/GCF_902167405.1_gadMor3.0_genomic.fna.gz
+ - Max Resources: 128 GB memory, 16 cpus, 10d time per job
+ - Container: docker - nfcore/eager:2.4.0
+ - Output dir: ./results
+ - Launch dir: /home/robert/eager
+ - Working dir: /home/robert/eager/work
+ - Script dir: /root/.nextflow/assets/nf-core/eager
+ - User: root
+ - Config Profile: test_full,docker
+ - Config Profile Description: Full test dataset to check nf-core/eager function
+ - Config Files: /root/.nextflow/assets/nf-core/eager/nextflow.config, /home/robert/eager/nextflow.config
+ - Date Started: 2021-11-26T01:25:23.195436+01:00
+ - Date Completed: 2021-11-26T04:40:36.542389+01:00
+ - Pipeline script file path: /root/.nextflow/assets/nf-core/eager/main.nf
+ - Pipeline script hash ID: 9941211d948d2785b065f0a8e9534e8f
+ - Pipeline repository Git URL: https://github.com/nf-core/eager
+ - Pipeline repository Git Commit: cc66639a8a2710f0de6aef5ae28e1614a5a4e3e2
+ - Pipeline Git branch/tag: master
+ - Nextflow Version: 21.10.1
+ - Nextflow Build: 5647
+ - Nextflow Compile Timestamp: 18-11-2021 09:23 UTC
+
+--
+nf-core/eager
+https://github.com/nf-core/eager

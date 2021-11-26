@@ -1,0 +1,8 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+2	89/4bf53d	196298	makeFastaIndex (Mammoth_MT_Krause.fasta)	COMPLETED	0	2021-11-22 19:11:22.610	3.2s	29ms	48.0%	0	0	61.1 KB	204 B
+3	53/b0cac5	196312	makeSeqDict (Mammoth_MT_Krause.fasta)	COMPLETED	0	2021-11-22 19:11:22.697	6s	3.4s	87.3%	90.2 MB	8.5 GB	22.3 MB	619.7 KB
+1	90/82fac8	197344	makeBWAIndex (Mammoth_MT_Krause.fasta)	COMPLETED	0	2021-11-22 19:11:28.762	2.4s	45ms	63.2%	3 MB	5.4 MB	119.3 KB	46 KB
+7	a1/229667	197806	output_documentation	COMPLETED	0	2021-11-22 19:11:31.226	3.1s	824ms	88.6%	11.9 MB	17 MB	8.1 MB	7.4 MB
+9	39/4c7eed	198174	fastqc (JK2802_L2)	COMPLETED	0	2021-11-22 19:11:34.293	7.5s	5.5s	165.0%	176.1 MB	2.5 GB	23.9 MB	856.8 KB
+8	15/33d53a	196771	get_software_versions	ABORTED	-	2021-11-22 19:11:25.847	-	-	-	-	-	-	-
+5	7a/2a3763	199315	fastqc (JK2782_L1)	ABORTED	-	2021-11-22 19:11:41.817	-	-	-	-	-	-	-
