@@ -1,0 +1,87 @@
+----------------------------------------------------
+                                        ,--./,-.
+        ___     __   __   __   ___     /,-._.--~\
+  |\ | |__  __ /  ` /  \ |__) |__         }  {
+  | \| |       \__, \__/ |  \ |___     \`-._,-`-,
+                                        `._,._,'
+  nf-core/eager v2.4.0
+----------------------------------------------------
+
+Run Name: goofy_hoover
+
+####################################################
+## nf-core/eager execution completed unsuccessfully! ##
+####################################################
+The exit status of the task that caused the workflow execution to fail was: null.
+The full error message was:
+
+Error executing process > 'adapter_removal (COD076E1bL1_L8)'
+
+Caused by:
+  Process requirement exceed available CPUs -- req: 8; avail: 4
+
+Command executed:
+
+  mkdir -p output
+  
+  AdapterRemoval --file1 ERR1943600_1.fastq.gz --file2 ERR1943600_2.fastq.gz --basename ERR1943600_1.fastq_L8.pe --gzip --threads 8 --qualitymax 41 --collapse  --trimns --trimqualities --adapter1 AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC --adapter2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA --minlength 30 --minquality 20 --minadapteroverlap 1
+  
+  cat *.collapsed.gz *.collapsed.truncated.gz *.singleton.truncated.gz *.pair1.truncated.gz *.pair2.truncated.gz > output/ERR1943600_1.fastq_L8.pe.combined.tmp.fq.gz
+  
+  mv *.settings output/
+  
+  ## Add R_ and L_ for unmerged reads for DeDup compatibility
+  AdapterRemovalFixPrefix -Xmx16g output/ERR1943600_1.fastq_L8.pe.combined.tmp.fq.gz > output/ERR1943600_1.fastq_L8.pe.combined.fq
+  pigz -p 7 output/ERR1943600_1.fastq_L8.pe.combined.fq
+
+Command exit status:
+  -
+
+Command output:
+  (empty)
+
+Work dir:
+  /home/robert_balink6/work/60/5ca0db66a8ecbfe51ee13225a3e067
+
+Tip: you can try to figure out what's wrong by changing to the process work dir and showing the script file named `.command.sh`
+
+
+
+The workflow was completed at 2021-11-25T20:40:51.297058Z (duration: 6m 44s)
+
+The command used to launch the workflow was as follows:
+
+  nextflow run nf-core/eager -profile test_full,docker
+
+
+
+Pipeline Configuration:
+-----------------------
+ - Pipeline Release: master
+ - Run Name: goofy_hoover
+ - Input: https://raw.githubusercontent.com/nf-core/test-datasets/eager/testdata/Benchmarking/benchmarking_vikingfish.tsv
+ - Fasta Ref: https://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_other/Gadus_morhua/representative/GCF_902167405.1_gadMor3.0/GCF_902167405.1_gadMor3.0_genomic.fna.gz
+ - Max Resources: 128 GB memory, 16 cpus, 10d time per job
+ - Container: docker - nfcore/eager:2.4.0
+ - Output dir: ./results
+ - Launch dir: /home/robert_balink6
+ - Working dir: /home/robert_balink6/work
+ - Script dir: /root/.nextflow/assets/nf-core/eager
+ - User: root
+ - Config Profile: test_full,docker
+ - Config Profile Description: Full test dataset to check nf-core/eager function
+ - Config Files: /root/.nextflow/assets/nf-core/eager/nextflow.config
+ - Date Started: 2021-11-25T20:34:07.300686Z
+ - Date Completed: 2021-11-25T20:40:51.297058Z
+ - Pipeline script file path: /root/.nextflow/assets/nf-core/eager/main.nf
+ - Pipeline script hash ID: 9941211d948d2785b065f0a8e9534e8f
+ - Pipeline repository Git URL: https://github.com/nf-core/eager
+ - Pipeline repository Git Commit: cc66639a8a2710f0de6aef5ae28e1614a5a4e3e2
+ - Pipeline Git branch/tag: master
+ - Nextflow Version: 21.10.3
+ - Nextflow Build: 5655
+ - Nextflow Compile Timestamp: 23-11-2021 07:29 UTC
+
+--
+nf-core/eager
+https://github.com/nf-core/eager
