@@ -1,0 +1,48 @@
+----------------------------------------------------
+                                        ,--./,-.
+        ___     __   __   __   ___     /,-._.--~\
+  |\ | |__  __ /  ` /  \ |__) |__         }  {
+  | \| |       \__, \__/ |  \ |___     \`-._,-`-,
+                                        `._,._,'
+  nf-core/eager v2.4.0
+----------------------------------------------------
+
+Run Name: scruffy_banach
+
+## nf-core/eager execution completed successfully! ##
+
+
+The workflow was completed at 2021-11-26T23:50:42.821696+01:00 (duration: 3h 16m 11s)
+
+The command used to launch the workflow was as follows:
+
+  nextflow run eager -profile test_full,docker
+
+
+
+Pipeline Configuration:
+-----------------------
+ - Run Name: scruffy_banach
+ - Input: https://raw.githubusercontent.com/tuberinfo/eager/master/test_own.tsv
+ - Fasta Ref: https://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_other/Gadus_morhua/representative/GCF_902167405.1_gadMor3.0/GCF_902167405.1_gadMor3.0_genomic.fna.gz
+ - Max Resources: 128 GB memory, 16 cpus, 10d time per job
+ - Container: docker - nfcore/eager:2.4.0
+ - Output dir: ./results
+ - Launch dir: /home/robert
+ - Working dir: /home/robert/work
+ - Script dir: /home/robert/eager
+ - User: root
+ - Config Profile: test_full,docker
+ - Config Profile Description: Full test dataset to check nf-core/eager function
+ - Config Files: /home/robert/eager/nextflow.config
+ - Date Started: 2021-11-26T20:34:31.849768+01:00
+ - Date Completed: 2021-11-26T23:50:42.821696+01:00
+ - Pipeline script file path: /home/robert/eager/main.nf
+ - Pipeline script hash ID: 9941211d948d2785b065f0a8e9534e8f
+ - Nextflow Version: 21.10.1
+ - Nextflow Build: 5647
+ - Nextflow Compile Timestamp: 18-11-2021 09:23 UTC
+
+--
+nf-core/eager
+https://github.com/nf-core/eager

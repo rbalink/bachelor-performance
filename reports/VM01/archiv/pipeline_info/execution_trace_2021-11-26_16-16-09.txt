@@ -1,0 +1,10 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+2	29/048724	282609	output_documentation	COMPLETED	0	2021-11-26 16:16:19.860	1.8s	660ms	67.4%	9.7 MB	15.5 MB	8.1 MB	7.4 MB
+3	de/eee5cb	282579	get_software_versions	COMPLETED	0	2021-11-26 16:16:19.703	38.7s	10.3s	140.8%	315.8 MB	34 GB	171.3 MB	49.4 KB
+1	d2/ce695f	284116	unzip_reference (GCF_902167405.1_gadMor3.0_genomic.fna.gz)	COMPLETED	0	2021-11-26 16:16:36.432	44.3s	4.3s	83.8%	4.1 MB	9.6 MB	185.9 MB	646.9 MB
+4	ec/333692	284174	fastqc (COD076E1bL1_L8)	COMPLETED	0	2021-11-26 16:16:58.436	1m 50s	1m 49s	185.6%	366 MB	2.9 GB	1.5 GB	1.9 MB
+10	0c/7f6009	287835	makeFastaIndex (GCF_902167405.1_gadMor3.0_genomic.fna)	COMPLETED	0	2021-11-26 16:18:48.753	3.1s	2.5s	85.8%	4.4 MB	11.8 MB	647 MB	8.4 KB
+7	e8/f5ecb3	285380	makeBWAIndex (GCF_902167405.1_gadMor3.0_genomic.fna)	COMPLETED	0	2021-11-26 16:17:21.719	13m 6s	13m 6s	96.5%	964.1 MB	968.6 MB	2.5 GB	1.7 GB
+5	d1/4c30a2	293816	adapter_removal (COD076E1bL1_L8)	FAILED	139	2021-11-26 16:30:28.215	6m 50s	6m 50s	-	-	-	-	-
+8	2f/baed1f	299893	makeSeqDict (GCF_902167405.1_gadMor3.0_genomic.fna)	FAILED	125	2021-11-26 16:37:18.613	226ms	134ms	-	-	-	-	-
+11	ae/fd6f24	299953	adapter_removal (COD076E1bL1_L8)	FAILED	125	2021-11-26 16:37:18.847	222ms	4ms	-	-	-	-	-
