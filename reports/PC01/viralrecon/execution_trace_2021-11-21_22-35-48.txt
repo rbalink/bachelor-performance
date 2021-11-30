@@ -1,0 +1,2 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+6	6a/b2bfd1	-	NFCORE_VIRALRECON:ILLUMINA:PREPARE_GENOME:BLAST_MAKEBLASTDB (nCoV-2019.reference.fasta)	FAILED	-	-	-	-	-	-	-	-	-
