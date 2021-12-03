@@ -1,0 +1,52 @@
+----------------------------------------------------
+                                        ,--./,-.
+        ___     __   __   __   ___     /,-._.--~\
+  |\ | |__  __ /  ` /  \ |__) |__         }  {
+  | \| |       \__, \__/ |  \ |___     \`-._,-`-,
+                                        `._,._,'
+  nf-core/eager v2.4.0
+----------------------------------------------------
+
+Run Name: grave_joliot
+
+## nf-core/eager execution completed successfully! ##
+
+
+The workflow was completed at 2021-12-03T11:36:54.903302-05:00 (duration: 2h 48m 55s)
+
+The command used to launch the workflow was as follows:
+
+  nextflow run eager -profile test_full,docker
+
+
+
+Pipeline Configuration:
+-----------------------
+ - Pipeline Release: master
+ - Run Name: grave_joliot
+ - Input: https://raw.githubusercontent.com/tuberinfo/eager/master/test_own.tsv
+ - Fasta Ref: https://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_other/Gadus_morhua/representative/GCF_902167405.1_gadMor3.0/GCF_902167405.1_gadMor3.0_genomic.fna.gz
+ - Max Resources: 128 GB memory, 16 cpus, 10d time per job
+ - Container: docker - nfcore/eager:2.4.0
+ - Output dir: ./results
+ - Launch dir: /home/robert/eager
+ - Working dir: /home/robert/eager/work
+ - Script dir: /home/robert/.nextflow/assets/nf-core/eager
+ - User: root
+ - Config Profile: test_full,docker
+ - Config Profile Description: Full test dataset to check nf-core/eager function
+ - Config Files: /home/robert/.nextflow/assets/nf-core/eager/nextflow.config, /home/robert/eager/nextflow.config
+ - Date Started: 2021-12-03T08:47:59.483869-05:00
+ - Date Completed: 2021-12-03T11:36:54.903302-05:00
+ - Pipeline script file path: /home/robert/.nextflow/assets/nf-core/eager/main.nf
+ - Pipeline script hash ID: 1d864dde87b1e5462e7c1a2d453043af
+ - Pipeline repository Git URL: https://github.com/nf-core/eager
+ - Pipeline repository Git Commit: 20b0be4e769d9a4cffda59723ad7152e0a64b312
+ - Pipeline Git branch/tag: master
+ - Nextflow Version: 21.10.4
+ - Nextflow Build: 5656
+ - Nextflow Compile Timestamp: 30-11-2021 16:09 UTC
+
+--
+nf-core/eager
+https://github.com/nf-core/eager
