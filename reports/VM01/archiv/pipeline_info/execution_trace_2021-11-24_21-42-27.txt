@@ -1,5 +1,0 @@
-task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
-5	36/f1de1c	-	adapter_removal (COD076E1bL1_L8)	FAILED	-	-	-	-	-	-	-	-	-
-2	b1/8c82b7	434540	output_documentation	COMPLETED	0	2021-11-24 21:42:36.438	6m 18s	470ms	87.0%	13.2 MB	18.1 MB	8.1 MB	7.4 MB
-1	6c/be2fd8	434656	unzip_reference (GCF_902167405.1_gadMor3.0_genomic.fna.gz)	COMPLETED	0	2021-11-24 21:42:42.739	6m 12s	3.6s	91.6%	4.3 MB	9.6 MB	185.9 MB	646.9 MB
-3	7c/cb458e	434532	get_software_versions	COMPLETED	0	2021-11-24 21:42:36.382	6m 18s	30.3s	41.0%	312.6 MB	6.3 GB	171.3 MB	48.8 KB

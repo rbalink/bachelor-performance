@@ -704,86 +704,115 @@ public class Performance {
 			ResultSet rs1 = statement.executeQuery("SELECT count(*) from postgres;");
 			rs1.next();
 			String entries = rs1.getString(1);
+			
+			double d,s,x;
 
-			ResultSet rs3 = statement.executeQuery("select pm_cpu_score from postgres where id = " + entries + ";");
-			rs3.next();
-			double d = Double.parseDouble(rs3.getString(1));
-			double s = pd.getPm().getCPU().getPmScore() / d;
+//			ResultSet rs3 = statement.executeQuery("select pm_cpu_score from postgres where id = " + entries + ";");
+//			rs3.next();
+//			double d = Double.parseDouble(rs3.getString(1));
+//			double s = pd.getPm().getCPU().getPmScore() / d;
+//
+//			double x = (s - 1) * 100;
+//			System.out.println("Nach PMScore ist die CPU " + new DecimalFormat("#.##").format(x) + "% schneller");
+//
+//			ResultSet rs4 = statement.executeQuery("select ub_cpu_score from postgres where id = " + entries + ";");
+//			rs4.next();
+//			d = Double.parseDouble(rs4.getString(1));
+//			s = pd.getUb().getCPU().getScore() / d;
+//
+//			x = (s - 1) * 100;
+//			System.out.println("Nach UB ist die CPU " + new DecimalFormat("#.##").format(x) + "% schneller");
 
-			double x = (s - 1) * 100;
-			System.out.println("Nach PMScore ist die CPU " + new DecimalFormat("#.##").format(x) + "% schneller");
-
-			ResultSet rs4 = statement.executeQuery("select ub_cpu_score from postgres where id = " + entries + ";");
-			rs4.next();
-			d = Double.parseDouble(rs4.getString(1));
-			s = pd.getUb().getCPU().getScore() / d;
-
-			x = (s - 1) * 100;
-			System.out.println("Nach UB ist die CPU " + new DecimalFormat("#.##").format(x) + "% schneller");
-
+			
+			// GeekBench Score
 			ResultSet rs5 = statement.executeQuery("select gb_cpu_multicore from postgres where id = " + entries + ";");
 			rs5.next();
 			d = Double.parseDouble(rs5.getString(1));
-			s = pd.getGbmulti() / d;
-
-			x = (s - 1) * 100;
-			System.out.println("Nach GB ist die CPU " + new DecimalFormat("#.##").format(x) + "% schneller");
-
-			ResultSet rs6 = statement.executeQuery("select boinc_cpu_comp from postgres where id = " + entries + ";");
-			rs6.next();
-			d = Double.parseDouble(rs6.getString(1));
-			s = pd.getGflopsComputer();
-
-			System.out.println("Nach GFLOPS aktuell: " + new DecimalFormat("#.##").format(s) + ", letzter Eintrag: "
-					+ new DecimalFormat("#.##").format(d));
-
-			ResultSet rs7 = statement
-					.executeQuery("select pm_cpu_floatingpm, pm_cpu_datacom from postgres where id = " + entries + ";");
-			rs7.next();
-			d = Double.parseDouble(rs7.getString(1));
-			double e = Double.parseDouble(rs7.getString(2));
-			double t = pd.getPm().getCPU().getFloatingPointMath();
-
-			s = pd.getPm().getCPU().getDataCompression();
-			double eigen = (((0.66 * (t / d)) + (0.33 * (s / e))) - 1) * 100;
-
-			System.out
-					.println("Nach eigener Berechnung CPU: " + new DecimalFormat("#.##").format(eigen) + "% schneller");
-
-			System.out.println();
-			ResultSet rs8 = statement.executeQuery("select ub_hdd_mixed from postgres where id = " + entries + ";");
-			rs8.next();
-			d = Double.parseDouble(rs8.getString(1));
-			s = pd.getUb().getHDD().getMixed() / d;
-
-			x = (s - 1) * 100;
-			System.out.println(
-					"HardDisk IO ReadWriteSpeed " + new DecimalFormat("#.##").format(x) + "% schneller (MB/s)");
-
-			System.out.println();
-			ResultSet rs9 = statement.executeQuery("select ub_ram_mixed from postgres where id = " + entries + ";");
-			rs9.next();
-			d = Double.parseDouble(rs9.getString(1));
-			s = pd.getUb().getRAM().getMixed() / d;
-
-			x = (s - 1) * 100;
-			System.out.println("RAM ReadWriteSpeed " + new DecimalFormat("#.##").format(x) + "% schneller (MB/s)");
-
-			ResultSet rs10 = statement.executeQuery("select ub_ram_latenz from postgres where id = " + entries + ";");
-			rs10.next();
-			d = Double.parseDouble(rs10.getString(1));
-			s = pd.getUb().getRAM().getLatenz() / d;
-
-			x = (s - 1) * 100;
-			System.out.println("RAM Latenz " + new DecimalFormat("#.##").format(x) + "% schneller (ns)");
-
-			ResultSet rs11 = statement.executeQuery("select ub_ram_score from postgres where id = " + entries + ";");
-			rs11.next();
-			d = Double.parseDouble(rs11.getString(1));
-			s = pd.getUb().getRAM().getScore() / d;
-
-			x = (s - 1) * 100;
-			System.out.println("RAM UB Score " + new DecimalFormat("#.##").format(x) + "% schneller");
+			double val;
+			if(pd.isGCP()){
+				val = pd.getPcr().getCPUmulti();
+			}else{
+				val = pd.getGbmulti();
+			}
+			double geekbenchMulti = val / d;
+			
+			ResultSet rsGBSingle = statement.executeQuery("select gb_cpu_singlecore from postgres where id = " + entries + ";");
+			rsGBSingle.next();
+			d = Double.parseDouble(rsGBSingle.getString(1));
+			
+			if(pd.isGCP()){
+				val = pd.getPcr().getCPUsingle();
+			}else{
+				val = pd.getGbsingle();
+			}
+			double geekbenchSingle = val / d;
+			
+			double scoreGB = (geekbenchSingle * 0.5) + (geekbenchMulti * 0.5);
+			//System.out.println("Geekbench Score: "+ scoreGB);
+			
+			//RAM Score
+			ResultSet ramRead = statement.executeQuery("select pm_ram_read from postgres where id = " + entries + ";");
+			ramRead.next();
+			d = Double.parseDouble(ramRead.getString(1));
+			
+			if(pd.isGCP()){
+				val = 23.432; //pd.getPcr().getIPOSread();
+			}else{
+				val = pd.getPm().getRAM().getReadGBs();
+			}
+			double ramR = val / d;
+			
+			ResultSet ramWrite = statement.executeQuery("select pm_ram_write from postgres where id = " + entries + ";");
+			ramWrite.next();
+			d = Double.parseDouble(ramWrite.getString(1));
+			
+			if(pd.isGCP()){
+				val = 21.958; //pd.getPcr().getIPOSwrite();
+			}else{
+				val = pd.getPm().getRAM().getWriteGBs();
+			}
+			double ramW = val / d;
+			
+			double scoreRAM = (ramR * 0.5) + (ramW * 0.5);
+			//System.out.println("PassMark: "+ scoreRAM);
+			
+			//DISK Score
+			
+			ResultSet diskRead = statement.executeQuery("select ub_hdd_read from postgres where id = " + entries + ";");
+			diskRead.next();
+			d = Double.parseDouble(diskRead.getString(1));
+			
+			if(pd.isGCP()){
+				val = 231.15; //pd.getPcr().getStorageRead(); UMRECHNEN !
+			}else{
+				val = pd.getPm().getHDD().getSequentialreadMBs();
+			}
+			double diskR = val / d;
+			
+			ResultSet diskWrite = statement.executeQuery("select ub_hdd_write  from postgres where id = " + entries + ";");
+			diskWrite.next();
+			d = Double.parseDouble(diskWrite.getString(1));
+			
+			if(pd.isGCP()){
+				val = 229.49; //pd.getPcr().getStorageWrite();
+			}else{
+				val = pd.getPm().getHDD().getSequentialwriteMBs();
+			}
+			double diskW = val / d;
+			
+			double scoreDisk = (diskR * 0.5) + (diskW * 0.5);
+			//System.out.println("UserBench Score: "+ scoreDisk);
+			
+			double cpuScore = (2/scoreGB)+(1/scoreRAM)+(1/scoreDisk);
+			cpuScore = 4 / cpuScore;
+			double ramScore = (1/scoreGB)+(2/scoreRAM)+(1/scoreDisk);
+			ramScore = 4 / ramScore;
+			double ioScore = (1/scoreGB)+(1/scoreRAM)+(2/scoreDisk);
+			ioScore = 4 / ioScore;
+			
+			System.out.println("Scores:\nCPU-lastige Workflows: "+cpuScore+"\nRAM-lastige Workflows: "+ramScore+"\nIO-lastige Workflows: "+ioScore);
+			
+			
 
 		} catch (Exception e) {
 			System.err.println("PostgresQL Error");

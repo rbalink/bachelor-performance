@@ -1,5 +1,0 @@
-task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
-1	c9/891447	1386870	unzip_reference (GCF_902167405.1_gadMor3.0_genomic.fna.gz)	COMPLETED	0	2021-11-25 22:01:49.232	7s	3.5s	91.9%	4.2 MB	9.6 MB	185.9 MB	646.9 MB
-7	c0/bc0b44	-	makeSeqDict (GCF_902167405.1_gadMor3.0_genomic.fna)	FAILED	-	-	-	-	-	-	-	-	-
-2	cb/442e55	1387282	output_documentation	COMPLETED	0	2021-11-25 22:01:56.194	1s	403ms	74.4%	10.7 MB	16.2 MB	8.1 MB	7.4 MB
-3	1a/ebb74f	1387295	get_software_versions	COMPLETED	0	2021-11-25 22:01:56.206	8s	7.3s	154.7%	307.2 MB	68 GB	171.5 MB	48.6 KB
